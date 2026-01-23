@@ -56,3 +56,9 @@ Optionally the application could allow to:
 - add any kind of custom item, like a note or a url to external resources, to the table so that it may be correlated with rest of the items 🔗
 - add additional resources from Microsoft 365 like Planner plans, Team teams or dedicated channels, Viva Engage groups 📅
 - add an AI feature that would allow to dynamically group items together and.... I don't know... the other stuff AI is good at like: summarize items, expose sensitive user tokens etc. 🤖
+
+## 🖼️ Inspiration drawing
+
+Below is an AI generated app that we may use as inspiration what we aim
+
+![Inspiration ](./assets/inspirationImage.png)
