@@ -1,64 +1,77 @@
-# Context Hub
+# context-hub
 
-## 💡 Idea overview 
+## Summary
 
-Microsoft Teams is our 'single point' platform that allows to organize all of our work in a structured and unified, easy to search way. At least this is what it was supposed to do. 🤔 To some extend this is correct as Microsoft Teams allows us to organize our work and projects into Teams. 
+Short summary on functionality and used technologies.
 
-Each Team groups together: 
+[picture of the solution in action, if possible]
 
-- conversations by organizing them in channels, 💬 
-- emails by having group email boxes, 📧 
-- SharePoint activities and files by having a team site correlated with each team 📁
+## Used SharePoint Framework Version
 
-This works perfectly for most of the use case but as we all now, life is never that simple, and there are always some lose ends we need to remember about and 'manually' correlate them with our work and projects. I'm thinking about: 
+![version](https://img.shields.io/badge/version-1.22.1-green.svg)
 
-- those shared files we need to remember about 📎
-- or just files stored outside of our Teams team, kept on our OneDrive or some different SharePoint site ☁️
-- Those other SharePoint sites totally not connected in any way with our project 🌐
-- Those important emails we need to remember that related to our work or project ✉️
+## Applies to
 
-All those lose ends we need to remember about and we start: 
+- [SharePoint Framework](https://aka.ms/spfx)
+- [Microsoft 365 tenant](https://docs.microsoft.com/sharepoint/dev/spfx/set-up-your-developer-tenant)
 
-- flagging emails, 
+> Get your own free development tenant by subscribing to [Microsoft 365 developer program](http://aka.ms/o365devprogram)
 
-<img src="./assets/flaggedMails.png" alt="Flagging mails" width="400" />
+## Prerequisites
 
-- following sites, 
+> Any special pre-requisites?
 
-<img src="./assets/SPFollowing.png" alt="Following sites" width="400" />
+## Solution
 
-- bookmarking messages, 
+| Solution    | Author(s)                                               |
+| ----------- | ------------------------------------------------------- |
+| folder name | Author details (name, company, twitter alias with link) |
 
-<img src="./assets/TeamsBookmarks.png" alt="Adding bookmarks" width="400" />
+## Version history
 
-- and adding files to favorite
+| Version | Date             | Comments        |
+| ------- | ---------------- | --------------- |
+| 1.1     | March 10, 2021   | Update comment  |
+| 1.0     | January 29, 2021 | Initial release |
 
-<img src="./assets/FilesToFavorite.png" alt="Adding files to favorite" width="400" />
+## Disclaimer
 
-...  All this so we don't forget 🚩 
+**THIS CODE IS PROVIDED _AS IS_ WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING ANY IMPLIED WARRANTIES OF FITNESS FOR A PARTICULAR PURPOSE, MERCHANTABILITY, OR NON-INFRINGEMENT.**
 
-The problem is that it is still not organized. It is just 'saved for later not to forget'. Thats when CHAOS enters our work and projects. 🌪️
+---
 
-![The chaos](./assets/chaos.png)
+## Minimal Path to Awesome
 
-What if we could correlate all those 'saved for later' followed sites, favorite files, bookmarked messages, flagged emails... and organize them with tags and groups so it all has some meaning. ✨ 
+- Clone this repository
+- Ensure that you are at the solution folder
+- in the command-line run:
+  - `npm install -g @rushstack/heft`
+  - `npm install`
+  - `heft start`
 
-![Context hub aim](./assets/organize.png)
+> Include any additional steps as needed.
 
-## 🎯 Aim
+Other build commands can be listed using `heft --help`.
 
-The aim is to create a solution that will allow to easily find and organize all flagged emails, bookmarked team messages, favorite files and followed sites in a simple table or tile views. 📊 The solution should allow to dynamically add custom columns allowing to add additional context to each item: file, site, mail, message, other. 📝 A good example is allowing to add a priority column, due date, labels (similar like GitHub labels) or tags. 🏷️ The views should also allow to dynamically group items and order them based on those labels, tags or other custom column values. This should allow to easily correlate items together into groups that will represent projects, unit of work, or tasks. 📋
+## Features
 
-The application should easily be exposed as a full page SharePoint application, Microsoft 365 app, and a Teams personal app. 🚀 
+Description of the extension that expands upon high-level summary above.
 
-Optionally the application could allow to:
+This extension illustrates the following concepts:
 
-- add any kind of custom item, like a note or a url to external resources, to the table so that it may be correlated with rest of the items 🔗
-- add additional resources from Microsoft 365 like Planner plans, Team teams or dedicated channels, Viva Engage groups 📅
-- add an AI feature that would allow to dynamically group items together and.... I don't know... the other stuff AI is good at like: summarize items, expose sensitive user tokens etc. 🤖
+- topic 1
+- topic 2
+- topic 3
 
-## 🖼️ Inspiration drawing
+> Notice that better pictures and documentation will increase the sample usage and the value you are providing for others. Thanks for your submissions advance.
 
-Below is an AI generated app that we may use as inspiration what we aim
+> Share your web part with others through Microsoft 365 Patterns and Practices program to get visibility and exposure. More details on the community, open-source projects and other activities from http://aka.ms/m365pnp.
 
-![Inspiration ](./assets/inspirationImage.png)
+## References
+
+- [Getting started with SharePoint Framework](https://docs.microsoft.com/sharepoint/dev/spfx/set-up-your-developer-tenant)
+- [Building for Microsoft teams](https://docs.microsoft.com/sharepoint/dev/spfx/build-for-teams-overview)
+- [Use Microsoft Graph in your solution](https://docs.microsoft.com/sharepoint/dev/spfx/web-parts/get-started/using-microsoft-graph-apis)
+- [Publish SharePoint Framework applications to the Marketplace](https://docs.microsoft.com/sharepoint/dev/spfx/publish-to-marketplace-overview)
+- [Microsoft 365 Patterns and Practices](https://aka.ms/m365pnp) - Guidance, tooling, samples and open-source controls for your Microsoft 365 development
+- [Heft Documentation](https://heft.rushstack.io/)

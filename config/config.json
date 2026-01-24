@@ -1,0 +1,18 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/spfx-build/config.2.0.schema.json",
+  "version": "2.0",
+  "bundles": {
+    "context-hub-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/contextHub/ContextHubWebPart.js",
+          "manifest": "./src/webparts/contextHub/ContextHubWebPart.manifest.json"
+        }
+      ]
+    }
+  },
+  "externals": {},
+  "localizedResources": {
+    "ContextHubWebPartStrings": "lib/webparts/contextHub/loc/{locale}.js"
+  }
+}
