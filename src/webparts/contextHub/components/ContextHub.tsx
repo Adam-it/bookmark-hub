@@ -1,7 +1,6 @@
 import * as React from 'react';
 import styles from './ContextHub.module.scss';
 import type { IContextHubProps } from './IContextHubProps';
-import FollowedSitesService from '../../../services/FollowedSitesService';
 import { IContextHubState } from './IContextHubState';
 
 export default class ContextHub extends React.Component<IContextHubProps, IContextHubState> {
@@ -10,23 +9,17 @@ export default class ContextHub extends React.Component<IContextHubProps, IConte
     super(props);
 
     this.state = {
-      followedSitesService: undefined
+      followedSites: []
     };
   }
 
-  public componentDidMount(): void {
-    this.setState({
-      followedSitesService: new FollowedSitesService()
-    });
+  public async componentDidMount(): Promise<void> {
+    const sites = await this.props.contextHubService.getFollowedSites();
+    this.setState({ followedSites: sites });
+    console.log('Followed sites:', sites);
   }
   
   public render(): React.ReactElement<IContextHubProps> {
-    const { isDarkTheme, hasTeamsContext } = this.props; // TODO: will be needed later
-
-    // example service integration
-    const followedSites = this.state.followedSitesService?.getMyFollowedSites() || []; 
-    console.log(followedSites); 
-
     return (
       <section className={styles.contextHub}>
         <div>
