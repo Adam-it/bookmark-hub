@@ -1,5 +1,5 @@
-import FollowedSitesService from '../../../services/FollowedSitesService';
+import { IFollowedSite } from '../../../services/models/IFollowedSite';
 
 export interface IContextHubState {
-  followedSitesService: FollowedSitesService | undefined;
+  followedSites: IFollowedSite[];
 }

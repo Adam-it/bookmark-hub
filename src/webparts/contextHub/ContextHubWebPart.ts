@@ -7,20 +7,24 @@ import { IReadonlyTheme } from '@microsoft/sp-component-base';
 import * as strings from 'ContextHubWebPartStrings';
 import ContextHub from './components/ContextHub';
 import { IContextHubProps } from './components/IContextHubProps';
+import { getGraph } from './pnpjsConfig';
+import { ContextHubService } from '../../services/ContextHubService';
 
-export interface IContextHubWebPartProps {}
+export interface IContextHubWebPartProps {}  
 
 export default class ContextHubWebPart extends BaseClientSideWebPart<IContextHubWebPartProps> {
 
   private _isDarkTheme: boolean = false;
   private _environmentMessage: string = '';
+  private _contextHubService: ContextHubService = new ContextHubService();
 
   public render(): void {
     const element: React.ReactElement<IContextHubProps> = React.createElement(
       ContextHub,
       {
         isDarkTheme: this._isDarkTheme,
-        hasTeamsContext: !!this.context.sdks.microsoftTeams
+        hasTeamsContext: !!this.context.sdks.microsoftTeams,
+        contextHubService: this._contextHubService
       }
     );
 
@@ -28,6 +32,9 @@ export default class ContextHubWebPart extends BaseClientSideWebPart<IContextHub
   }
 
   protected onInit(): Promise<void> {
+    // Initialize PnP Graph for the service to use
+    getGraph(this.context);
+
     return this._getEnvironmentMessage().then(message => {
       this._environmentMessage = message;
     });
