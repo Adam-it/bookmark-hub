@@ -3,6 +3,7 @@ import { graphfi, GraphFI, SPFx } from "@pnp/graph";
 import { LogLevel, PnPLogging } from "@pnp/logging";
 import "@pnp/graph/users";
 import "@pnp/graph/sites";
+import "@pnp/graph/mail";
 
 let _graph: GraphFI;
 
