@@ -4,6 +4,7 @@ import { LogLevel, PnPLogging } from "@pnp/logging";
 import "@pnp/graph/users";
 import "@pnp/graph/sites";
 import "@pnp/graph/mail";
+import "@pnp/graph/files";
 
 let _graph: GraphFI;
 
