@@ -1,4 +1,4 @@
-declare interface IContextHubWebPartStrings {
+declare interface IBookmarkHubWebPartStrings {
   PropertyPaneDescription: string;
   BasicGroupName: string;
   DescriptionFieldLabel: string;
@@ -13,7 +13,7 @@ declare interface IContextHubWebPartStrings {
   UnknownEnvironment: string;
 }
 
-declare module 'ContextHubWebPartStrings' {
-  const strings: IContextHubWebPartStrings;
+declare module 'BookmarkHubWebPartStrings' {
+  const strings: IBookmarkHubWebPartStrings;
   export = strings;
 }

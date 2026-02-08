@@ -1,11 +1,11 @@
-import { IContextHubService } from "./IContextHubService";
 import { IFollowedSite } from "./models/IFollowedSite";
 import { IFlaggedEmail } from "./models/IFlaggedEmail";
 import { IFollowedFile } from "./models/IFollowedFile";
 import { IBookmark, BookmarkType } from "./models/IBookmark";
-import { getGraph } from "../webparts/contextHub/pnpjsConfig";
+import { getGraph } from "../webparts/bookmarkHub/pnpjsConfig";
+import { IBookmarkHubService } from "./IBookmarkHubService";
 
-export class ContextHubService implements IContextHubService {
+export class BookmarkHubService implements IBookmarkHubService {
 
     public async getAllBookmarks(): Promise<IBookmark[]> {
         try {

@@ -4,27 +4,27 @@ import { Version } from '@microsoft/sp-core-library';
 import { type IPropertyPaneConfiguration } from '@microsoft/sp-property-pane';
 import { BaseClientSideWebPart } from '@microsoft/sp-webpart-base';
 import { IReadonlyTheme } from '@microsoft/sp-component-base';
-import * as strings from 'ContextHubWebPartStrings';
-import ContextHub from './components/ContextHub';
-import { IContextHubProps } from './components/IContextHubProps';
+import * as strings from 'BookmarkHubWebPartStrings';
+import BookmarkHub from './components/BookmarkHub';
+import { IBookmarkHubProps } from './components/IBookmarkHubProps';
 import { getGraph } from './pnpjsConfig';
-import { ContextHubService } from '../../services/ContextHubService';
+import { BookmarkHubService } from '../../services/BookmarkHubService';
 
-export interface IContextHubWebPartProps {}  
+export interface IBookmarkHubWebPartProps {}  
 
-export default class ContextHubWebPart extends BaseClientSideWebPart<IContextHubWebPartProps> {
+export default class BookmarkHubWebPart extends BaseClientSideWebPart<IBookmarkHubWebPartProps> {
 
   private _isDarkTheme: boolean = false;
   private _environmentMessage: string = '';
-  private _contextHubService: ContextHubService = new ContextHubService();
+  private _bookmarkHubService: BookmarkHubService = new BookmarkHubService();
 
   public render(): void {
-    const element: React.ReactElement<IContextHubProps> = React.createElement(
-      ContextHub,
+    const element: React.ReactElement<IBookmarkHubProps> = React.createElement(
+      BookmarkHub,
       {
         isDarkTheme: this._isDarkTheme,
         hasTeamsContext: !!this.context.sdks.microsoftTeams,
-        contextHubService: this._contextHubService
+        bookmarkHubService: this._bookmarkHubService
       }
     );
 

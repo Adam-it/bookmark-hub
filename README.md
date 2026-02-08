@@ -1,4 +1,4 @@
-# Context Hub
+# Bookmark Hub
 
 ## 💡 Idea overview 
 
@@ -43,7 +43,7 @@ The problem is that it is still not organized. It is just 'saved for later not t
 
 What if we could correlate all those 'saved for later' followed sites, favorite files, bookmarked messages, flagged emails... and organize them with tags and groups so it all has some meaning. ✨ 
 
-![Context hub aim](./assets/organize.png)
+![Bookmark hub aim](./assets/organize.png)
 
 ## 🎯 Aim
 

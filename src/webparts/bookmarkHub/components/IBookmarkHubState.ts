@@ -1,5 +1,5 @@
 import { IBookmark } from '../../../services/models/IBookmark';
 
-export interface IContextHubState {
+export interface IBookmarkHubState {
   bookmarks: IBookmark[];
 }
