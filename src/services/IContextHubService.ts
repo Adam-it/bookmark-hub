@@ -1,7 +1,5 @@
-import { IFollowedSite } from "./models/IFollowedSite";
-import { IFlaggedEmail } from "./models/IFlaggedEmail";
+import { IBookmark } from "./models/IBookmark";
 
 export interface IContextHubService {
-    getFollowedSites(): Promise<IFollowedSite[]>;
-    getFlaggedEmails(): Promise<IFlaggedEmail[]>;
+    getAllBookmarks(): Promise<IBookmark[]>;
 }

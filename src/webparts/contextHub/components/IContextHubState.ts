@@ -1,7 +1,5 @@
-import { IFollowedSite } from '../../../services/models/IFollowedSite';
-import { IFlaggedEmail } from '../../../services/models/IFlaggedEmail';
+import { IBookmark } from '../../../services/models/IBookmark';
 
 export interface IContextHubState {
-  followedSites: IFollowedSite[];
-  flaggedEmails: IFlaggedEmail[];
+  bookmarks: IBookmark[];
 }

@@ -9,22 +9,16 @@ export default class ContextHub extends React.Component<IContextHubProps, IConte
     super(props);
 
     this.state = {
-      followedSites: [],
-      flaggedEmails: []
+      bookmarks: []
     };
   }
 
   public async componentDidMount(): Promise<void> {
-    const sites = await this.props.contextHubService.getFollowedSites();
-    const emails = await this.props.contextHubService.getFlaggedEmails();
-    this.setState({ 
-      followedSites: sites,
-      flaggedEmails: emails 
-    });
+    const bookmarks = await this.props.contextHubService.getAllBookmarks();
+    this.setState({ bookmarks });
 
     // TODO: log now, remove later
-    console.log('Followed sites:', this.state.followedSites);
-    console.log('Flagged emails:', this.state.flaggedEmails);
+    console.log('All bookmarks:', this.state.bookmarks);
   }
   
   public render(): React.ReactElement<IContextHubProps> {
