@@ -6,6 +6,30 @@ import { IBookmark, BookmarkType } from "./models/IBookmark";
 import { getGraph } from "../webparts/contextHub/pnpjsConfig";
 
 export class ContextHubService implements IContextHubService {
+
+    public async getAllBookmarks(): Promise<IBookmark[]> {
+        try {
+            const [sites, emails, files] = await Promise.all([
+                this.getFollowedSites(),
+                this.getFlaggedEmails(),
+                this.getFollowedFiles()
+            ]);
+
+            const bookmarks: IBookmark[] = [
+                ...sites.map(site => this._mapSiteToBookmark(site)),
+                ...emails.map(email => this._mapEmailToBookmark(email)),
+                ...files.map(file => this._mapFileToBookmark(file))
+            ];
+
+            return bookmarks.sort((a, b) => 
+                new Date(b.date).getTime() - new Date(a.date).getTime()
+            );
+        } catch (error) {
+            console.error('Error getting all bookmarks:', error);
+            return [];
+        }
+    }
+
     private async getFollowedSites(): Promise<IFollowedSite[]> {
         try {
             const graph = getGraph();
@@ -39,29 +63,6 @@ export class ContextHubService implements IContextHubService {
             return items as IFollowedFile[];
         } catch (error) {
             console.error('Error getting followed files:', error);
-            return [];
-        }
-    }
-
-    public async getAllBookmarks(): Promise<IBookmark[]> {
-        try {
-            const [sites, emails, files] = await Promise.all([
-                this.getFollowedSites(),
-                this.getFlaggedEmails(),
-                this.getFollowedFiles()
-            ]);
-
-            const bookmarks: IBookmark[] = [
-                ...sites.map(site => this._mapSiteToBookmark(site)),
-                ...emails.map(email => this._mapEmailToBookmark(email)),
-                ...files.map(file => this._mapFileToBookmark(file))
-            ];
-
-            return bookmarks.sort((a, b) => 
-                new Date(b.date).getTime() - new Date(a.date).getTime()
-            );
-        } catch (error) {
-            console.error('Error getting all bookmarks:', error);
             return [];
         }
     }
