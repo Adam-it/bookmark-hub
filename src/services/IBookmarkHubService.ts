@@ -1,5 +1,5 @@
 import { IBookmark } from "./models/IBookmark";
 
-export interface IContextHubService {
+export interface IBookmarkHubService {
     getAllBookmarks(): Promise<IBookmark[]>;
 }
