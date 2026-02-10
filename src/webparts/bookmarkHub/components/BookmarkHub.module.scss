@@ -3,4 +3,12 @@
 .bookmarkHub {
   padding: 1em;
   color: "[theme:bodyText, default: #323130]";
+
+  .bookmarkHubPre {
+    background-color: #f5f5f5;
+    padding: 10px;
+    border-radius: 4px;
+    overflow: auto;
+    max-height: 300px;
+  }
 }
