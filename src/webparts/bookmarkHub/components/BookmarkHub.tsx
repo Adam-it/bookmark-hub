@@ -1,5 +1,6 @@
 import * as React from 'react';
 import styles from './BookmarkHub.module.scss';
+import { IAppData } from "../../../services/models/IAppData";
 import type { IBookmarkHubProps } from './IBookmarkHubProps';
 import { IBookmarkHubState } from './IBookmarkHubState';
 
@@ -10,26 +11,26 @@ export default class BookmarkHub extends React.Component<IBookmarkHubProps, IBoo
 
     this.state = {
       bookmarks: [],
-      savedBookmarks: []
+      appData: {} as IAppData
     };
   }
 
   public async componentDidMount(): Promise<void> {
-    const [bookmarks, savedBookmarks] = await Promise.all([
+    const [bookmarks, appData] = await Promise.all([
       this.props.bookmarkHubService.getAllBookmarks(),
-      this.props.bookmarkHubService.getBookmarksFromAppRoot()
+      this.props.bookmarkHubService.getAppData()
     ]);
-    this.setState({ bookmarks, savedBookmarks });
+    this.setState({ bookmarks, appData });
   }
 
   // TODO: added for testing - need to implement UI for saving bookmarks in the future
-  private _saveBookmarks = async (): Promise<void> => {
+  private _saveAppData = async (): Promise<void> => {
     try {
-      const { bookmarks } = this.state;
-      await this.props.bookmarkHubService.saveBookmarksToAppRoot(bookmarks);
-      this.setState({ savedBookmarks: bookmarks });
+      const { appData } = this.state;
+      await this.props.bookmarkHubService.saveAppData(appData!);
+      this.setState({ appData });
     } catch (error) {
-      console.error('Error saving bookmarks:', error);
+      console.error('Error saving app data:', error);
     }
   }
 
@@ -41,14 +42,14 @@ export default class BookmarkHub extends React.Component<IBookmarkHubProps, IBoo
           <h2>Bookmark Hub</h2>
 
           <h3>Current Bookmarks - from Graph API</h3>
-          <button onClick={this._saveBookmarks}>Save Bookmarks to App Root</button>
+          <button onClick={this._saveAppData}>Save Bookmarks to App Root</button>
           <pre className={styles.bookmarkHubPre}>
             {JSON.stringify(this.state.bookmarks, null, 2)}
           </pre>
 
-          <h3>Saved Bookmarks - from OneDrive App Root</h3>
+          <h3>Saved App Data - from OneDrive App Root</h3>
           <pre className={styles.bookmarkHubPre}>
-            {JSON.stringify(this.state.savedBookmarks, null, 2)}
+            {JSON.stringify(this.state.appData, null, 2)}
           </pre>
         </div>
       </section>

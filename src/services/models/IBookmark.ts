@@ -1,3 +1,6 @@
+import { IBookmarkGroup } from "./IBookmarkGroup";
+import { IBookmarkLabel } from "./IBookmarkLabel";
+
 export enum BookmarkType {
     Site = 'site',
     Email = 'email',
@@ -11,6 +14,8 @@ export interface IBookmark {
     url: string;
     date: string;
     type: BookmarkType;
+    labels?: IBookmarkLabel[];
+    groups?: IBookmarkGroup[];
     metadata?: {
         from?: string;
         author?: string;
