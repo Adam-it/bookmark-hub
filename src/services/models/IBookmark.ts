@@ -8,6 +8,7 @@ export enum BookmarkType {
 }
 
 export interface IBookmark {
+    index?: number;
     id: string;
     title: string;
     description?: string;
