@@ -4,8 +4,12 @@ import { IAppData } from "../../../services/models/IAppData";
 import type { IBookmarkHubProps } from './IBookmarkHubProps';
 import { IBookmarkHubState } from './IBookmarkHubState';
 import { IBookmarkGroup } from '../../../services/models/IBookmarkGroup';
-import { DefaultButton, Panel, PanelType } from '@fluentui/react';
+import { IBookmarkLabel } from '../../../services/models/IBookmarkLabel';
+import { DefaultButton, Panel, PanelType, Stack, IStackTokens } from '@fluentui/react';
 import BookmarkGroupManager from './bookmarkGroupManager/BookmarkGroupManager';
+import BookmarkLabelManager from './bookmarkLabelManager/BookmarkLabelManager';
+
+const toolbarTokens: IStackTokens = { childrenGap: 8 };
 
 export default class BookmarkHub extends React.Component<IBookmarkHubProps, IBookmarkHubState> {
 
@@ -16,6 +20,7 @@ export default class BookmarkHub extends React.Component<IBookmarkHubProps, IBoo
       bookmarks: [],
       appData: {} as IAppData,
       isGroupPanelOpen: false,
+      isLabelPanelOpen: false,
     };
   }
 
@@ -29,6 +34,19 @@ export default class BookmarkHub extends React.Component<IBookmarkHubProps, IBoo
 
   private _openGroupPanel = (): void => this.setState({ isGroupPanelOpen: true });
   private _closeGroupPanel = (): void => this.setState({ isGroupPanelOpen: false });
+
+  private _openLabelPanel = (): void => this.setState({ isLabelPanelOpen: true });
+  private _closeLabelPanel = (): void => this.setState({ isLabelPanelOpen: false });
+
+  private _onLabelsChanged = async (labels: IBookmarkLabel[]): Promise<void> => {
+    const updatedAppData: IAppData = { ...this.state.appData, labels };
+    this.setState({ appData: updatedAppData });
+    try {
+      await this.props.bookmarkHubService.saveAppData(updatedAppData);
+    } catch (error) {
+      console.error('Error saving labels:', error);
+    }
+  };
 
   private _onGroupsChanged = async (groups: IBookmarkGroup[]): Promise<void> => {
     const updatedAppData: IAppData = { ...this.state.appData, groups };
@@ -53,18 +71,25 @@ export default class BookmarkHub extends React.Component<IBookmarkHubProps, IBoo
 
   // TODO: added for testing - need to implement UI for rendering and saving bookmarks in the future
   public render(): React.ReactElement<IBookmarkHubProps> {
-    const { bookmarks, appData, isGroupPanelOpen } = this.state;
+    const { bookmarks, appData, isGroupPanelOpen, isLabelPanelOpen } = this.state;
 
     return (
       <section className={styles.bookmarkHub}>
         <div>
           <h2>Bookmark Hub</h2>
 
-          <DefaultButton
-            iconProps={{ iconName: 'GroupList' }}
-            text="Manage Groups"
-            onClick={this._openGroupPanel}
-          />
+          <Stack horizontal tokens={toolbarTokens}>
+            <DefaultButton
+              iconProps={{ iconName: 'GroupList' }}
+              text="Manage Groups"
+              onClick={this._openGroupPanel}
+            />
+            <DefaultButton
+              iconProps={{ iconName: 'Tag' }}
+              text="Manage Labels"
+              onClick={this._openLabelPanel}
+            />
+          </Stack>
 
           <h3>Current Bookmarks - from Graph API</h3>
           <button onClick={this._saveAppData}>Save Bookmarks to App Root</button>
@@ -89,6 +114,20 @@ export default class BookmarkHub extends React.Component<IBookmarkHubProps, IBoo
           <BookmarkGroupManager
             groups={appData?.groups ?? []}
             onGroupsChanged={this._onGroupsChanged}
+          />
+        </Panel>
+
+        <Panel
+          isOpen={isLabelPanelOpen}
+          onDismiss={this._closeLabelPanel}
+          type={PanelType.medium}
+          headerText="Manage Labels"
+          isBlocking={false}
+          closeButtonAriaLabel="Close"
+        >
+          <BookmarkLabelManager
+            labels={appData?.labels ?? []}
+            onLabelsChanged={this._onLabelsChanged}
           />
         </Panel>
       </section>
