@@ -51,7 +51,7 @@ export class BookmarkHubService implements IBookmarkHubService {
             return parsed as IAppData;
         } catch (error) {
             console.error('Error getting app data from app root:', error);
-            return {} as IAppData; 
+            throw error;
         }
     }
 
