@@ -5,6 +5,7 @@ import { IBookmark, BookmarkType } from "./models/IBookmark";
 import { getGraph } from "../webparts/bookmarkHub/pnpjsConfig";
 import { IBookmarkHubService } from "./IBookmarkHubService";
 import { SpecialFolder } from "@pnp/graph/files";
+import { IAppData } from "./models/IAppData";
 
 export class BookmarkHubService implements IBookmarkHubService {
     private static _appDataFolderName: string = 'BookmarkHub';
@@ -13,9 +14,9 @@ export class BookmarkHubService implements IBookmarkHubService {
     public async getAllBookmarks(): Promise<IBookmark[]> {
         try {
             const [sites, emails, files] = await Promise.all([
-                this.getFollowedSites(),
-                this.getFlaggedEmails(),
-                this.getFollowedFiles()
+                this._getFollowedSites(),
+                this._getFlaggedEmails(),
+                this._getFollowedFiles()
             ]);
 
             const bookmarks: IBookmark[] = [
@@ -28,12 +29,50 @@ export class BookmarkHubService implements IBookmarkHubService {
                 new Date(b.date).getTime() - new Date(a.date).getTime()
             );
         } catch (error) {
-            console.error('Error getting all bookmarks:', error);
+            console.error('Error getting bookmarks:', error);
             return [];
         }
     }
 
-    private async getFollowedSites(): Promise<IFollowedSite[]> {
+    public async getAppData(): Promise<IAppData> {
+        try {
+            const folderId = await this._ensureAppDataFolder();
+            const graph = getGraph();
+            const children = await graph.me.drive.getItemById(folderId).children
+                .filter(`name eq '${BookmarkHubService._appDataFileName}'`)();
+
+            if (children.length === 0 || !children[0].id) {
+                return {} as IAppData; 
+            }
+
+            const fileContent = await graph.me.drive.getItemById(children[0].id).getContent();
+            const text = await fileContent.text();
+            const parsed = JSON.parse(text);
+            return parsed as IAppData;
+        } catch (error) {
+            console.error('Error getting app data from app root:', error);
+            throw error;
+        }
+    }
+
+    public async saveAppData(appData: IAppData): Promise<void> {
+        try {
+            const folderId = await this._ensureAppDataFolder();
+            const graph = getGraph();
+            const content = JSON.stringify(appData, null, 2);
+
+            await graph.me.drive.getItemById(folderId).upload({
+                content: content,
+                filePathName: BookmarkHubService._appDataFileName,
+                contentType: 'application/json'
+            });
+        } catch (error) {
+            console.error('Error saving app data to app root:', error);
+            throw error;
+        }
+    }
+
+    private async _getFollowedSites(): Promise<IFollowedSite[]> {
         try {
             const graph = getGraph();
             const response = await graph.me.followedSites
@@ -45,7 +84,7 @@ export class BookmarkHubService implements IBookmarkHubService {
         }
     }
 
-    private async getFlaggedEmails(): Promise<IFlaggedEmail[]> {
+    private async _getFlaggedEmails(): Promise<IFlaggedEmail[]> {
         try {
             const graph = getGraph();
             const messages = await graph.me.messages
@@ -58,7 +97,7 @@ export class BookmarkHubService implements IBookmarkHubService {
         }
     }
 
-    private async getFollowedFiles(): Promise<IFollowedFile[]> {
+    private async _getFollowedFiles(): Promise<IFollowedFile[]> {
         try {
             const graph = getGraph();
             const items = await graph.me.drive.following
@@ -67,49 +106,6 @@ export class BookmarkHubService implements IBookmarkHubService {
         } catch (error) {
             console.error('Error getting followed files:', error);
             return [];
-        }
-    }
-
-    // TODO: extend IBookmark to include other bookmark metadata like labels, category, etc.
-    public async getBookmarksFromAppRoot(): Promise<IBookmark[]> {
-        try {
-            const folderId = await this._ensureAppDataFolder();
-            const graph = getGraph();
-            const children = await graph.me.drive.getItemById(folderId).children
-                .filter(`name eq '${BookmarkHubService._appDataFileName}'`)();
-
-            if (children.length === 0 || !children[0].id) {
-                return [];
-            }
-
-            const fileContent = await graph.me.drive.getItemById(children[0].id).getContent();
-            const text = await fileContent.text();
-            const parsed = JSON.parse(text);
-            if (!Array.isArray(parsed)) {
-                console.error('Invalid bookmarks data format: expected an array.');
-                return [];
-            }
-            return parsed as IBookmark[];
-        } catch (error) {
-            console.error('Error getting bookmarks from app root:', error);
-            return [];
-        }
-    }
-
-    public async saveBookmarksToAppRoot(bookmarks: IBookmark[]): Promise<void> {
-        try {
-            const folderId = await this._ensureAppDataFolder();
-            const graph = getGraph();
-            const content = JSON.stringify(bookmarks, null, 2);
-
-            await graph.me.drive.getItemById(folderId).upload({
-                content: content,
-                filePathName: BookmarkHubService._appDataFileName,
-                contentType: 'application/json'
-            });
-        } catch (error) {
-            console.error('Error saving bookmarks to app root:', error);
-            throw error;
         }
     }
 
