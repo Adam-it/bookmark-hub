@@ -4,6 +4,5 @@ import { IBookmark } from '../../../services/models/IBookmark';
 export interface IBookmarkHubState {
   bookmarks: IBookmark[];
   appData: IAppData;
-  isGroupPanelOpen: boolean;
-  isLabelPanelOpen: boolean;
+  isLoading: boolean;
 }

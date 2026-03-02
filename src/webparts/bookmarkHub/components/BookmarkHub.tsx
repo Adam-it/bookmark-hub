@@ -5,11 +5,11 @@ import type { IBookmarkHubProps } from './IBookmarkHubProps';
 import { IBookmarkHubState } from './IBookmarkHubState';
 import { IBookmarkGroup } from '../../../services/models/IBookmarkGroup';
 import { IBookmarkLabel } from '../../../services/models/IBookmarkLabel';
-import { DefaultButton, Panel, PanelType, Stack, IStackTokens } from '@fluentui/react';
-import BookmarkGroupManager from './bookmarkGroupManager/BookmarkGroupManager';
-import BookmarkLabelManager from './bookmarkLabelManager/BookmarkLabelManager';
-
-const toolbarTokens: IStackTokens = { childrenGap: 8 };
+import { Spinner, SpinnerSize } from '@fluentui/react';
+import { IBookmark } from '../../../services/models/IBookmark';
+import BookmarkHubToolbar from './bookmarkHubToolbar/BookmarkHubToolbar';
+import BookmarkList from './bookmarkList/BookmarkList';
+import SavedBookmarkGroups from './savedBookmarkGroups/SavedBookmarkGroups';
 
 export default class BookmarkHub extends React.Component<IBookmarkHubProps, IBookmarkHubState> {
 
@@ -19,8 +19,7 @@ export default class BookmarkHub extends React.Component<IBookmarkHubProps, IBoo
     this.state = {
       bookmarks: [],
       appData: {} as IAppData,
-      isGroupPanelOpen: false,
-      isLabelPanelOpen: false,
+      isLoading: true,
     };
   }
 
@@ -29,14 +28,37 @@ export default class BookmarkHub extends React.Component<IBookmarkHubProps, IBoo
       this.props.bookmarkHubService.getAllBookmarks(),
       this.props.bookmarkHubService.getAppData()
     ]);
-    this.setState({ bookmarks, appData });
+    this.setState({ bookmarks, appData, isLoading: false });
   }
 
-  private _openGroupPanel = (): void => this.setState({ isGroupPanelOpen: true });
-  private _closeGroupPanel = (): void => this.setState({ isGroupPanelOpen: false });
+  private _onAssignGroup = async (bookmark: IBookmark, group: IBookmarkGroup): Promise<void> => {
+    const { appData } = this.state;
+    const existingBookmarks = appData?.bookmarks ?? [];
+    const existingIndex = existingBookmarks.findIndex(bm => bm.id === bookmark.id);
+    const updatedBookmark: IBookmark = { ...bookmark, groups: [group] };
+    const updatedBookmarks = existingIndex >= 0
+      ? existingBookmarks.map((bm, i) => i === existingIndex ? updatedBookmark : bm)
+      : [...existingBookmarks, updatedBookmark];
+    const updatedAppData: IAppData = { ...appData, bookmarks: updatedBookmarks };
+    this.setState({ appData: updatedAppData });
+    try {
+      await this.props.bookmarkHubService.saveAppData(updatedAppData);
+    } catch (error) {
+      console.error('Error assigning group:', error);
+    }
+  };
 
-  private _openLabelPanel = (): void => this.setState({ isLabelPanelOpen: true });
-  private _closeLabelPanel = (): void => this.setState({ isLabelPanelOpen: false });
+  private _onRemoveBookmark = async (bookmark: IBookmark): Promise<void> => {
+    const { appData } = this.state;
+    const updatedBookmarks = (appData?.bookmarks ?? []).filter(bm => bm.id !== bookmark.id);
+    const updatedAppData: IAppData = { ...appData, bookmarks: updatedBookmarks };
+    this.setState({ appData: updatedAppData });
+    try {
+      await this.props.bookmarkHubService.saveAppData(updatedAppData);
+    } catch (error) {
+      console.error('Error removing bookmark:', error);
+    }
+  };
 
   private _onLabelsChanged = async (labels: IBookmarkLabel[]): Promise<void> => {
     const updatedAppData: IAppData = { ...this.state.appData, labels };
@@ -45,6 +67,20 @@ export default class BookmarkHub extends React.Component<IBookmarkHubProps, IBoo
       await this.props.bookmarkHubService.saveAppData(updatedAppData);
     } catch (error) {
       console.error('Error saving labels:', error);
+    }
+  };
+
+  private _onToggleGroupCollapse = async (group: IBookmarkGroup): Promise<void> => {
+    const { appData } = this.state;
+    const updatedGroups = (appData?.groups ?? []).map(g =>
+      g.id === group.id ? { ...g, collapsed: !g.collapsed } : g
+    );
+    const updatedAppData: IAppData = { ...appData, groups: updatedGroups };
+    this.setState({ appData: updatedAppData });
+    try {
+      await this.props.bookmarkHubService.saveAppData(updatedAppData);
+    } catch (error) {
+      console.error('Error toggling group collapse:', error);
     }
   };
 
@@ -58,99 +94,52 @@ export default class BookmarkHub extends React.Component<IBookmarkHubProps, IBoo
     }
   };
 
-  // TODO: added for testing - need to implement UI for saving bookmarks in the future
-  private _saveAppData = async (): Promise<void> => {
-    try {
-      const { appData } = this.state;
-      await this.props.bookmarkHubService.saveAppData(appData!);
-      this.setState({ appData });
-    } catch (error) {
-      console.error('Error saving app data:', error);
-    }
-  }
-
   // TODO: added for testing - need to implement UI for rendering and saving bookmarks in the future
   public render(): React.ReactElement<IBookmarkHubProps> {
-    const { bookmarks, appData, isGroupPanelOpen, isLabelPanelOpen } = this.state;
+    const { bookmarks, appData, isLoading } = this.state;
 
     return (
       <section className={styles.bookmarkHub}>
         <div>
-          <h2>Bookmark Hub</h2>
+          <BookmarkHubToolbar
+            groups={appData?.groups ?? []}
+            labels={appData?.labels ?? []}
+            onGroupsChanged={this._onGroupsChanged}
+            onLabelsChanged={this._onLabelsChanged}
+          />
 
-          <Stack horizontal tokens={toolbarTokens}>
-            <DefaultButton
-              iconProps={{ iconName: 'GroupList' }}
-              text="Manage Groups"
-              onClick={this._openGroupPanel}
+          {isLoading ? (
+            <Spinner
+              size={SpinnerSize.large}
+              label="Loading bookmarks..."
+              className={styles.spinner}
             />
-            <DefaultButton
-              iconProps={{ iconName: 'Tag' }}
-              text="Manage Labels"
-              onClick={this._openLabelPanel}
-            />
-          </Stack>
-
-          <h3>Current Bookmarks - from Graph API</h3>
-          <button onClick={this._saveAppData}>Save Bookmarks to App Root</button>
-          {bookmarks && bookmarks.length > 0 ? (
-            <table className={styles.bookmarkTable}>
-              <thead>
-                <tr>
-                  <th>Title</th>
-                  <th>URL</th>
-                  <th>Date</th>
-                  <th>Type</th>
-                </tr>
-              </thead>
-              <tbody>
-                {bookmarks.map((bm, idx) => (
-                  <tr key={bm.id || idx}>
-                    <td>{bm.title}</td>
-                    <td><a href={bm.url} target="_blank" rel="noopener noreferrer">{bm.url}</a></td>
-                    <td>{bm.date}</td>
-                    <td>{bm.type}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
           ) : (
-            <p>No bookmarks to display</p>
+            <BookmarkList
+              bookmarks={bookmarks}
+              savedBookmarks={appData?.bookmarks ?? []}
+              groups={appData?.groups ?? []}
+              onAssignGroup={this._onAssignGroup}
+            />
           )}
 
+          {!isLoading && (
+            <SavedBookmarkGroups
+              savedBookmarks={appData?.bookmarks ?? []}
+              groups={appData?.groups ?? []}
+              onAssignGroup={this._onAssignGroup}
+              onRemoveBookmark={this._onRemoveBookmark}
+              onToggleGroupCollapse={this._onToggleGroupCollapse}
+            />
+          )}
+
+          {/* Temporary view to remove later */}
           <h3>Saved App Data - from OneDrive App Root</h3>
           <pre className={styles.bookmarkHubPre}>
             {JSON.stringify(appData, null, 2)}
           </pre>
+          {/* Temporary view to remove later */}
         </div>
-
-        <Panel
-          isOpen={isGroupPanelOpen}
-          onDismiss={this._closeGroupPanel}
-          type={PanelType.medium}
-          headerText="Manage Groups"
-          isBlocking={false}
-          closeButtonAriaLabel="Close"
-        >
-          <BookmarkGroupManager
-            groups={appData?.groups ?? []}
-            onGroupsChanged={this._onGroupsChanged}
-          />
-        </Panel>
-
-        <Panel
-          isOpen={isLabelPanelOpen}
-          onDismiss={this._closeLabelPanel}
-          type={PanelType.medium}
-          headerText="Manage Labels"
-          isBlocking={false}
-          closeButtonAriaLabel="Close"
-        >
-          <BookmarkLabelManager
-            labels={appData?.labels ?? []}
-            onLabelsChanged={this._onLabelsChanged}
-          />
-        </Panel>
       </section>
     );
   }

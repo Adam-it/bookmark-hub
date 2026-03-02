@@ -1,0 +1,78 @@
+import * as React from 'react';
+import { DefaultButton, Panel, PanelType, Stack, IStackTokens } from '@fluentui/react';
+import { IBookmarkHubToolbarProps } from './IBookmarkHubToolbarProps';
+import BookmarkGroupManager from '../bookmarkGroupManager/BookmarkGroupManager';
+import BookmarkLabelManager from '../bookmarkLabelManager/BookmarkLabelManager';
+
+interface IBookmarkHubToolbarState {
+  isGroupPanelOpen: boolean;
+  isLabelPanelOpen: boolean;
+}
+
+const toolbarTokens: IStackTokens = { childrenGap: 8 };
+
+export default class BookmarkHubToolbar extends React.Component<IBookmarkHubToolbarProps, IBookmarkHubToolbarState> {
+
+  constructor(props: IBookmarkHubToolbarProps) {
+    super(props);
+    this.state = {
+      isGroupPanelOpen: false,
+      isLabelPanelOpen: false,
+    };
+  }
+
+  private _openGroupPanel  = (): void => this.setState({ isGroupPanelOpen: true });
+  private _closeGroupPanel = (): void => this.setState({ isGroupPanelOpen: false });
+  private _openLabelPanel  = (): void => this.setState({ isLabelPanelOpen: true });
+  private _closeLabelPanel = (): void => this.setState({ isLabelPanelOpen: false });
+
+  public render(): React.ReactElement<IBookmarkHubToolbarProps> {
+    const { groups, labels, onGroupsChanged, onLabelsChanged } = this.props;
+    const { isGroupPanelOpen, isLabelPanelOpen } = this.state;
+
+    return (
+      <>
+        <Stack horizontal tokens={toolbarTokens} horizontalAlign="end">
+          <DefaultButton
+            iconProps={{ iconName: 'GroupList' }}
+            text="Manage Groups"
+            onClick={this._openGroupPanel}
+          />
+          <DefaultButton
+            iconProps={{ iconName: 'Tag' }}
+            text="Manage Labels"
+            onClick={this._openLabelPanel}
+          />
+        </Stack>
+
+        <Panel
+          isOpen={isGroupPanelOpen}
+          onDismiss={this._closeGroupPanel}
+          type={PanelType.medium}
+          headerText="Manage Groups"
+          isBlocking={false}
+          closeButtonAriaLabel="Close"
+        >
+          <BookmarkGroupManager
+            groups={groups}
+            onGroupsChanged={onGroupsChanged}
+          />
+        </Panel>
+
+        <Panel
+          isOpen={isLabelPanelOpen}
+          onDismiss={this._closeLabelPanel}
+          type={PanelType.medium}
+          headerText="Manage Labels"
+          isBlocking={false}
+          closeButtonAriaLabel="Close"
+        >
+          <BookmarkLabelManager
+            labels={labels}
+            onLabelsChanged={onLabelsChanged}
+          />
+        </Panel>
+      </>
+    );
+  }
+}

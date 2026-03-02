@@ -1,0 +1,30 @@
+@import '~@fluentui/react/dist/sass/References.scss';
+
+.groupSection {
+  margin-top: 2em;
+}
+
+.groupHeader {
+  border-bottom: 2px solid #edebe9;
+  padding-bottom: 0.25em;
+  margin-bottom: 0;
+
+  button {
+    color: #323130;
+  }
+}
+
+.groupTitle {
+  margin: 0;
+  font-size: 1.1em;
+  font-weight: 600;
+}
+
+.list {
+  margin-top: 0.5em;
+}
+
+.pagination {
+  margin-top: 0.5em;
+  justify-content: flex-end;
+}

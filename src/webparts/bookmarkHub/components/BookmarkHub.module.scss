@@ -12,28 +12,31 @@
     max-height: 300px;
   }
 
-  .bookmarkTable {
-    width: 100%;
-    border-collapse: collapse;
+  .spinner {
+    margin-top: 2em;
+  }
+
+  .bookmarkList {
     margin-top: 1em;
+  }
 
-    th, td {
-      border: 1px solid #ddd;
-      padding: 8px;
-      text-align: left;
-    }
+  .savedGroupSection {
+    margin-top: 2em;
+  }
 
-    th {
-      background-color: #f3f2f1;
-    }
+  .savedGroupTitle {
+    margin: 0 0 0.25em 0;
+    font-size: 1.1em;
+    border-bottom: 2px solid #edebe9;
+    padding-bottom: 0.25em;
+  }
 
-    tr:nth-child(even) {
-      background-color: #faf9f8;
-    }
+  .pagination {
+    margin-top: 0.5em;
+    justify-content: flex-end;
+  }
 
-    a {
-      color: inherit;
-      text-decoration: underline;
-    }
+  .emptyState {
+    margin-top: 1em;
   }
 }
