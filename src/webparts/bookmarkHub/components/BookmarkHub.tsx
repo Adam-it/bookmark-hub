@@ -93,9 +93,30 @@ export default class BookmarkHub extends React.Component<IBookmarkHubProps, IBoo
 
           <h3>Current Bookmarks - from Graph API</h3>
           <button onClick={this._saveAppData}>Save Bookmarks to App Root</button>
-          <pre className={styles.bookmarkHubPre}>
-            {JSON.stringify(bookmarks, null, 2)}
-          </pre>
+          {bookmarks && bookmarks.length > 0 ? (
+            <table className={styles.bookmarkTable}>
+              <thead>
+                <tr>
+                  <th>Title</th>
+                  <th>URL</th>
+                  <th>Date</th>
+                  <th>Type</th>
+                </tr>
+              </thead>
+              <tbody>
+                {bookmarks.map((bm, idx) => (
+                  <tr key={bm.id || idx}>
+                    <td>{bm.title}</td>
+                    <td><a href={bm.url} target="_blank" rel="noopener noreferrer">{bm.url}</a></td>
+                    <td>{bm.date}</td>
+                    <td>{bm.type}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          ) : (
+            <p>No bookmarks to display</p>
+          )}
 
           <h3>Saved App Data - from OneDrive App Root</h3>
           <pre className={styles.bookmarkHubPre}>

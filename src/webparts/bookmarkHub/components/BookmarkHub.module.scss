@@ -11,4 +11,29 @@
     overflow: auto;
     max-height: 300px;
   }
+
+  .bookmarkTable {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1em;
+
+    th, td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      text-align: left;
+    }
+
+    th {
+      background-color: #f3f2f1;
+    }
+
+    tr:nth-child(even) {
+      background-color: #faf9f8;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: underline;
+    }
+  }
 }
