@@ -12,28 +12,20 @@
     max-height: 300px;
   }
 
-  .bookmarkTable {
-    width: 100%;
-    border-collapse: collapse;
+  .spinner {
+    margin-top: 2em;
+  }
+
+  .bookmarkList {
     margin-top: 1em;
+  }
 
-    th, td {
-      border: 1px solid #ddd;
-      padding: 8px;
-      text-align: left;
-    }
+  .pagination {
+    margin-top: 0.5em;
+    justify-content: flex-end;
+  }
 
-    th {
-      background-color: #f3f2f1;
-    }
-
-    tr:nth-child(even) {
-      background-color: #faf9f8;
-    }
-
-    a {
-      color: inherit;
-      text-decoration: underline;
-    }
+  .emptyState {
+    margin-top: 1em;
   }
 }
