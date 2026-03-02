@@ -134,6 +134,16 @@ export default class SavedBookmarkGroups extends React.Component<ISavedBookmarkG
         },
       },
       {
+        key: 'labels',
+        name: 'Labels',
+        fieldName: 'labels',
+        minWidth: 120,
+        maxWidth: 200,
+        isResizable: true,
+        // TODO: render assigned labels
+        onRender: (_item: IBookmark) => <span>—</span>,
+      },
+      {
         key: 'group',
         name: 'Change Group',
         fieldName: 'group',
@@ -222,15 +232,26 @@ export default class SavedBookmarkGroups extends React.Component<ISavedBookmarkG
 
           return (
             <div key={group.index} className={styles.groupSection}>
-              <h3 className={styles.groupTitle}>{group.name}</h3>
-              <DetailsList
-                items={paged}
-                columns={this._buildColumns(group.index, gs.sortKey, gs.isSortedDescending)}
-                selectionMode={SelectionMode.none}
-                isHeaderVisible={true}
-                className={styles.list}
-              />
-              {this._renderPagination(group.index, sorted.length)}
+              <Stack horizontal verticalAlign="center" className={styles.groupHeader}>
+                <IconButton
+                  iconProps={{ iconName: group.collapsed ? 'ChevronRight' : 'ChevronDown' }}
+                  ariaLabel={group.collapsed ? 'Expand group' : 'Collapse group'}
+                  onClick={() => this.props.onToggleGroupCollapse(group).catch(console.error)}
+                />
+                <Text variant="mediumPlus" className={styles.groupTitle}>{group.name}</Text>
+              </Stack>
+              {!group.collapsed && (
+                <>
+                  <DetailsList
+                    items={paged}
+                    columns={this._buildColumns(group.index, gs.sortKey, gs.isSortedDescending)}
+                    selectionMode={SelectionMode.none}
+                    isHeaderVisible={true}
+                    className={styles.list}
+                  />
+                  {this._renderPagination(group.index, sorted.length)}
+                </>
+              )}
             </div>
           );
         })}

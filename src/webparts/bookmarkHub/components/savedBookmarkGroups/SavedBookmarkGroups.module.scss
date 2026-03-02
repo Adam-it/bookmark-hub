@@ -4,12 +4,20 @@
   margin-top: 2em;
 }
 
-.groupTitle {
-  margin: 0 0 0.25em 0;
-  font-size: 1.1em;
-  font-weight: 600;
+.groupHeader {
   border-bottom: 2px solid #edebe9;
   padding-bottom: 0.25em;
+  margin-bottom: 0;
+
+  button {
+    color: #323130;
+  }
+}
+
+.groupTitle {
+  margin: 0;
+  font-size: 1.1em;
+  font-weight: 600;
 }
 
 .list {
