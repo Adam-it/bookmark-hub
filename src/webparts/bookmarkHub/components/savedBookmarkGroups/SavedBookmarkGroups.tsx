@@ -203,18 +203,18 @@ export default class SavedBookmarkGroups extends React.Component<ISavedBookmarkG
 
   // ── render ────────────────────────────────────────────────────────────────
 
-  public render(): React.ReactElement<ISavedBookmarkGroupsProps> | undefined {
+  public render(): React.ReactElement<ISavedBookmarkGroupsProps> | null {
     const { savedBookmarks, groups } = this.props;
 
     const sections = groups
       .filter(g => !g.archived)
       .map(group => ({
         group,
-        items: savedBookmarks.filter(bm => bm.groups?.some(g => g.index === group.index)),
+        items: savedBookmarks.filter(bm => bm.groups?.some(g => g.id === group.id)),
       }))
       .filter(s => s.items.length > 0);
 
-    if (sections.length === 0) return undefined;
+    if (sections.length === 0) return null;
 
     return (
       <>

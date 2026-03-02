@@ -89,17 +89,18 @@ export default class BookmarkGroupManager extends React.Component<
     }
 
     const { groups, onGroupsChanged } = this.props;
-    const isEditing = editingGroup.index !== undefined;
+    const isEditing = !!editingGroup.id;
     let updatedGroups: IBookmarkGroup[];
 
     if (isEditing) {
       updatedGroups = groups.map(g =>
-        g.index === editingGroup.index ? (editingGroup as IBookmarkGroup) : g
+        g.id === editingGroup.id ? (editingGroup as IBookmarkGroup) : g
       );
     } else {
       const sorted = this._getSorted();
       const newGroup: IBookmarkGroup = {
         ...(editingGroup as IBookmarkGroup),
+        id: crypto.randomUUID(),
         index: sorted.length,
       };
       updatedGroups = [...groups, newGroup];
@@ -123,7 +124,7 @@ export default class BookmarkGroupManager extends React.Component<
 
     const { groups, onGroupsChanged } = this.props;
     const updated = groups
-      .filter(g => g.index !== groupToDelete.index)
+      .filter(g => g.id !== groupToDelete.id)
       .sort((a, b) => a.index - b.index)
       .map((g, i) => ({ ...g, index: i }));
 
@@ -228,7 +229,7 @@ export default class BookmarkGroupManager extends React.Component<
   public render(): React.ReactElement {
     const { isFormDialogOpen, isDeleteDialogOpen, editingGroup, groupToDelete, nameError } =
       this.state;
-    const isEditing = editingGroup?.index !== undefined;
+    const isEditing = !!editingGroup?.id;
     const sorted = this._getSorted();
 
     const commandBarItems: ICommandBarItemProps[] = [
@@ -259,7 +260,7 @@ export default class BookmarkGroupManager extends React.Component<
             layoutMode={DetailsListLayoutMode.justified}
             selectionMode={SelectionMode.none}
             isHeaderVisible={true}
-            getKey={(item: IBookmarkGroup) => String(item.index)}
+            getKey={(item: IBookmarkGroup) => item.id}
           />
         )}
 

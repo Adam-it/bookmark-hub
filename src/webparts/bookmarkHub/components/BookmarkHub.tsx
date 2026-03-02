@@ -73,7 +73,7 @@ export default class BookmarkHub extends React.Component<IBookmarkHubProps, IBoo
   private _onToggleGroupCollapse = async (group: IBookmarkGroup): Promise<void> => {
     const { appData } = this.state;
     const updatedGroups = (appData?.groups ?? []).map(g =>
-      g.index === group.index ? { ...g, collapsed: !g.collapsed } : g
+      g.id === group.id ? { ...g, collapsed: !g.collapsed } : g
     );
     const updatedAppData: IAppData = { ...appData, groups: updatedGroups };
     this.setState({ appData: updatedAppData });
