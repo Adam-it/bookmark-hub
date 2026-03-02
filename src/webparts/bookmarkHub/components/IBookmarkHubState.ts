@@ -5,9 +5,4 @@ export interface IBookmarkHubState {
   bookmarks: IBookmark[];
   appData: IAppData;
   isLoading: boolean;
-  isGroupPanelOpen: boolean;
-  isLabelPanelOpen: boolean;
-  sortKey: 'title' | 'date' | undefined;
-  isSortedDescending: boolean;
-  currentPage: number;
 }

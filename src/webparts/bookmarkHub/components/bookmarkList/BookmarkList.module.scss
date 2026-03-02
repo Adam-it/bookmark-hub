@@ -1,0 +1,26 @@
+@import '~@fluentui/react/dist/sass/References.scss';
+
+.container {
+  margin-top: 1.5em;
+}
+
+.header {
+  font-size: 1.15em;
+  font-weight: 600;
+  margin: 0 0 0.25em 0;
+  padding-bottom: 0.25em;
+  border-bottom: 2px solid #edebe9;
+}
+
+.list {
+  margin-top: 0.5em;
+}
+
+.pagination {
+  margin-top: 0.5em;
+  justify-content: flex-end;
+}
+
+.emptyState {
+  margin-top: 1em;
+}
