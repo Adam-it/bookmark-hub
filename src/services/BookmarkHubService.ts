@@ -42,7 +42,7 @@ export class BookmarkHubService implements IBookmarkHubService {
                 .filter(`name eq '${BookmarkHubService._appDataFileName}'`)();
 
             if (children.length === 0 || !children[0].id) {
-                return {} as IAppData; 
+                return { bookmarks: [], groups: [], labels: [] }; 
             }
 
             const fileContent = await graph.me.drive.getItemById(children[0].id).getContent();

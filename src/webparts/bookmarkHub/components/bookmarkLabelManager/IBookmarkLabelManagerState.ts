@@ -8,4 +8,5 @@ export interface IBookmarkLabelManagerState {
   labelToDelete: { label: IBookmarkLabel; index: number } | undefined;
   nameError: string;
   colorError: string;
+  deleteError: string;
 }
