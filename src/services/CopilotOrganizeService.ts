@@ -188,6 +188,7 @@ export function mergeCopilotSuggestions(existingAppData: IAppData, copilotAppDat
       const groupChanged    = existingGroupId !== copilotGroupId;
       return {
         ...copilotVersion,
+        labels: eb.labels,           // always keep user-assigned labels
         suggestion: groupChanged,
         groups: (copilotVersion.groups ?? []).map(bg => groupById[bg.id] ?? bg),
       };
