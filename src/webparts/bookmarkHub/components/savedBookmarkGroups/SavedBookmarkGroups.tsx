@@ -117,15 +117,6 @@ export default class SavedBookmarkGroups extends React.Component<ISavedBookmarkG
           </Link>
         ),
       },
-      // Description is empty for every item except sites, and it makes the list look empty, so hiding it for now - remove it if you agree
-      // {
-      //   key: 'description',
-      //   name: 'Description',
-      //   fieldName: 'description',
-      //   minWidth: 180,
-      //   isResizable: true,
-      //   onRender: (item: IBookmark) => <span>{item.description || '—'}</span>,
-      // },
       {
         key: 'date',
         name: 'Date',

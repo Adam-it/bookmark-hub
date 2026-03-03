@@ -129,15 +129,6 @@ export default class BookmarkList extends React.Component<IBookmarkListProps, IB
           </Link>
         ),
       },
-      // Description is empty for every item except sites, and it makes the list look empty, so hiding it for now - remove it if you agree
-      // {
-      //   key: 'description',
-      //   name: 'Description',
-      //   fieldName: 'description',
-      //   minWidth: 180,
-      //   isResizable: true,
-      //   onRender: (item: IBookmark) => <span>{item.description || '—'}</span>,
-      // },
       {
         key: 'labels',
         name: 'Labels',
@@ -193,21 +184,23 @@ export default class BookmarkList extends React.Component<IBookmarkListProps, IB
         key: 'group',
         name: 'Assign Group',
         fieldName: 'group',
-        minWidth: 160,
-        maxWidth: 220,
+        minWidth: 100,
+        maxWidth: 100,
         onRender: (item: IBookmark) => (
-          <Dropdown
-            key={item.id}
-            placeholder="Assign to group..."
-            selectedKey={null}
-            options={groupOptions}
-            styles={{ root: { minWidth: 150 } }}
-            onChange={(_ev, option) => {
-              if (!option) return;
-              const group = groups.find((g: IBookmarkGroup) => g.index === option.key);
-              if (group) { onAssignGroup(item, group).catch(console.error); }
-            }}
-          />
+          <Stack horizontal verticalAlign="center" tokens={{ childrenGap: 4 }}>
+            <Dropdown
+              key={item.id}
+              placeholder="Assign to group..."
+              selectedKey={null}
+              options={groupOptions}
+              styles={{ root: { minWidth: 150 } }}
+              onChange={(_ev, option) => {
+                if (!option) return;
+                const group = groups.find((g: IBookmarkGroup) => g.index === option.key);
+                if (group) { onAssignGroup(item, group).catch(console.error); }
+              }}
+            />
+          </Stack>
         ),
       },
     ];
