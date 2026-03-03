@@ -1,10 +1,6 @@
 import * as React from 'react';
 import styles from './BookmarkList.module.scss';
-import {
-  DetailsList, IColumn, SelectionMode, Link, Icon,
-  MessageBar, MessageBarType, IconButton, Text, Stack,
-  Dropdown, IDropdownOption,
-} from '@fluentui/react';
+import { DetailsList, IColumn, SelectionMode, Link, Icon, MessageBar, MessageBarType, IconButton, Text, Stack, Dropdown, IDropdownOption, DefaultButton, Spinner, SpinnerSize, DetailsRow, IDetailsRowProps } from '@fluentui/react';
 import { IBookmark, BookmarkType } from '../../../../services/models/IBookmark';
 import { IBookmarkGroup } from '../../../../services/models/IBookmarkGroup';
 import { IBookmarkListProps } from './IBookmarkListProps';
@@ -17,6 +13,7 @@ interface IBookmarkListState {
   sortKey: 'title' | 'date' | undefined;
   isSortedDescending: boolean;
   currentPage: number;
+  isCopilotLoading: boolean;
   labelSelectorTarget: HTMLElement | undefined;
   selectedBookmark: IBookmark | undefined;
 }
@@ -29,12 +26,11 @@ export default class BookmarkList extends React.Component<IBookmarkListProps, IB
       sortKey: undefined,
       isSortedDescending: false,
       currentPage: 1,
+      isCopilotLoading: false,
       labelSelectorTarget: undefined,
       selectedBookmark: undefined,
     };
   }
-
-  // ── helpers ─────────────────────────────────────────────────────────────
 
   private _getTypeIcon(type: BookmarkType): string {
     switch (type) {
@@ -79,8 +75,6 @@ export default class BookmarkList extends React.Component<IBookmarkListProps, IB
     });
   }
 
-  // ── column header click ──────────────────────────────────────────────────
-
   private _onColumnHeaderClick = (_ev: React.MouseEvent<HTMLElement>, column: IColumn): void => {
     if (column.key !== 'title' && column.key !== 'date') return;
     const key = column.key as 'title' | 'date';
@@ -88,8 +82,6 @@ export default class BookmarkList extends React.Component<IBookmarkListProps, IB
     const descending = sortKey === key ? !isSortedDescending : false;
     this.setState({ sortKey: key, isSortedDescending: descending, currentPage: 1 });
   };
-
-  // ── columns ──────────────────────────────────────────────────────────────
 
   private _getColumns(): IColumn[] {
     const { groups, onAssignGroup } = this.props;
@@ -206,8 +198,6 @@ export default class BookmarkList extends React.Component<IBookmarkListProps, IB
     ];
   }
 
-  // ── pagination ───────────────────────────────────────────────────────────
-
   private _renderPagination(totalItems: number): React.ReactElement | null {
     const { currentPage } = this.state;
     const totalPages = Math.ceil(totalItems / PAGE_SIZE);
@@ -231,17 +221,79 @@ export default class BookmarkList extends React.Component<IBookmarkListProps, IB
     );
   }
 
-  // ── render ───────────────────────────────────────────────────────────────
+  private _onCopilotClick = async (): Promise<void> => {
+    this.setState({ isCopilotLoading: true });
+    try {
+      await this.props.onOrganizeWithCopilot();
+    } finally {
+      this.setState({ isCopilotLoading: false });
+    }
+  };
+
+  private _onRetryClick = async (): Promise<void> => {
+    this.setState({ isCopilotLoading: true });
+    try {
+      await this.props.onCopilotRetry();
+    } finally {
+      this.setState({ isCopilotLoading: false });
+    }
+  };
 
   public render(): React.ReactElement<IBookmarkListProps> {
-    const { availableLabels, onAssignLabels } = this.props;
-    const { currentPage, labelSelectorTarget, selectedBookmark } = this.state;
+    const { currentPage, isCopilotLoading, labelSelectorTarget, selectedBookmark } = this.state;
+    const { hasCopilotSuggestions, onCopilotApprove, onCopilotDecline, savedBookmarks, availableLabels, onAssignLabels } = this.props;
     const sorted = this._getSortedBookmarks();
     const paged = sorted.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
 
+    const renderCopilotActions = (): React.ReactElement => {
+      if (isCopilotLoading) {
+        return <Spinner size={SpinnerSize.small} label="Organizing with Copilot…" labelPosition="right" />;
+      }
+      if (hasCopilotSuggestions) {
+        return (
+          <Stack horizontal tokens={{ childrenGap: 8 }}>
+            <DefaultButton
+              text="Approve"
+              iconProps={{ iconName: 'CheckMark' }}
+              className={styles.approveButton}
+              onClick={() => { onCopilotApprove().catch(console.error); }}
+            />
+            <DefaultButton
+              text="Retry"
+              iconProps={{ iconName: 'Refresh' }}
+              onClick={this._onRetryClick}
+            />
+            <DefaultButton
+              text="Decline"
+              iconProps={{ iconName: 'Cancel' }}
+              className={styles.declineButton}
+              onClick={() => { onCopilotDecline().catch(console.error); }}
+            />
+          </Stack>
+        );
+      }
+      return (
+        <DefaultButton
+          text="Organize with Copilot"
+          iconProps={{ iconName: 'ChatBot' }}
+          ariaLabel="Organize with Microsoft 365 Copilot"
+          className={styles.copilotButton}
+          onClick={this._onCopilotClick}
+        />
+      );
+    };
+
     return (
       <div className={styles.container}>
-        <h2 className={styles.header}>Not assigned bookmarks</h2>
+        <Stack
+          horizontal
+          verticalAlign="center"
+          horizontalAlign="space-between"
+          className={styles.headerContainer}
+        >
+          <h2 className={styles.header}>Not assigned bookmarks</h2>
+          {renderCopilotActions()}
+        </Stack>
 
         {sorted.length > 0 ? (
           <>
@@ -251,6 +303,19 @@ export default class BookmarkList extends React.Component<IBookmarkListProps, IB
               selectionMode={SelectionMode.none}
               isHeaderVisible={true}
               className={styles.list}
+              onRenderRow={(rowProps: IDetailsRowProps | undefined) => {
+                if (!rowProps) return null;
+                const item = rowProps.item as IBookmark;
+                const savedEntry = savedBookmarks.find(bm => bm.id === item.id);
+                return (
+                  <DetailsRow
+                    {...rowProps}
+                    styles={savedEntry?.suggestion ? {
+                      root: { borderLeft: '3px solid #f0a500', backgroundColor: '#fffcf0' }
+                    } : undefined}
+                  />
+                );
+              }}
             />
             {this._renderPagination(sorted.length)}
           </>

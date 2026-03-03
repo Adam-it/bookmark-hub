@@ -10,6 +10,8 @@ import { IBookmark } from '../../../services/models/IBookmark';
 import BookmarkHubToolbar from './bookmarkHubToolbar/BookmarkHubToolbar';
 import BookmarkList from './bookmarkList/BookmarkList';
 import SavedBookmarkGroups from './savedBookmarkGroups/SavedBookmarkGroups';
+import { CopilotChatService } from '../../../services/CopilotChatService';
+import { organizeBookmarksWithCopilot, mergeCopilotSuggestions } from '../../../services/CopilotOrganizeService';
 
 export default class BookmarkHub extends React.Component<IBookmarkHubProps, IBookmarkHubState> {
 
@@ -20,13 +22,15 @@ export default class BookmarkHub extends React.Component<IBookmarkHubProps, IBoo
       bookmarks: [],
       appData: { bookmarks: [], groups: [], labels: [] },
       isLoading: true,
+      hasCopilotSuggestions: false,
     };
   }
 
   public async componentDidMount(): Promise<void> {
     const [bookmarks, appData] = await Promise.all([
       this.props.bookmarkHubService.getAllBookmarks(),
-      this.props.bookmarkHubService.getAppData()
+      this.props.bookmarkHubService.getAppData(),
+      CopilotChatService.init(this.props.context.msGraphClientFactory),
     ]);
     this.setState({ bookmarks, appData, isLoading: false });
   }
@@ -129,6 +133,63 @@ export default class BookmarkHub extends React.Component<IBookmarkHubProps, IBoo
     }
   };
 
+  private _onSummarizeWithCopilot = async (): Promise<void> => {
+    const { appData, bookmarks } = this.state;
+    const result = await organizeBookmarksWithCopilot(bookmarks, appData);
+    if (result.success && result.organizedAppData) {
+      const mergedAppData = mergeCopilotSuggestions(appData, result.organizedAppData);
+      // Don't persist yet — wait for user to Approve
+      this.setState({ appData: mergedAppData, hasCopilotSuggestions: true });
+    }
+  };
+
+  private _onCopilotApprove = async (): Promise<void> => {
+    const { appData } = this.state;
+    const approvedAppData: IAppData = {
+      ...appData,
+      bookmarks: appData.bookmarks.map(bm => ({ ...bm, suggestion: false })),
+      groups: appData.groups.map(g => ({ ...g, suggestion: false })),
+    };
+    this.setState({ appData: approvedAppData, hasCopilotSuggestions: false });
+    try {
+      await this.props.bookmarkHubService.saveAppData(approvedAppData);
+    } catch (error) {
+      console.error('[Copilot] Error saving approved data:', error);
+    }
+  };
+
+  private _onCopilotDecline = async (): Promise<void> => {
+    const { appData } = this.state;
+    const cleanedAppData: IAppData = {
+      ...appData,
+      bookmarks: appData.bookmarks.filter(bm => !bm.suggestion),
+      groups: appData.groups.filter(g => !g.suggestion),
+    };
+    this.setState({ appData: cleanedAppData, hasCopilotSuggestions: false });
+    try {
+      await this.props.bookmarkHubService.saveAppData(cleanedAppData);
+    } catch (error) {
+      console.error('[Copilot] Error saving after decline:', error);
+    }
+  };
+
+  private _onCopilotRetry = async (): Promise<void> => {
+    const { appData, bookmarks } = this.state;
+    // Clean up previous suggestions first (in memory, don't persist yet)
+    const cleanedAppData: IAppData = {
+      ...appData,
+      bookmarks: appData.bookmarks.filter(bm => !bm.suggestion),
+      groups: appData.groups.filter(g => !g.suggestion),
+    };
+    this.setState({ appData: cleanedAppData, hasCopilotSuggestions: false });
+    // Re-run with the cleaned state
+    const result = await organizeBookmarksWithCopilot(bookmarks, cleanedAppData);
+    if (result.success && result.organizedAppData) {
+      const mergedAppData = mergeCopilotSuggestions(cleanedAppData, result.organizedAppData);
+      this.setState({ appData: mergedAppData, hasCopilotSuggestions: true });
+    }
+  };
+
   public render(): React.ReactElement<IBookmarkHubProps> {
     const { bookmarks, appData, isLoading } = this.state;
 
@@ -156,6 +217,11 @@ export default class BookmarkHub extends React.Component<IBookmarkHubProps, IBoo
               groups={appData?.groups ?? []}
               availableLabels={appData?.labels ?? []}
               onAssignGroup={this._onAssignGroup}
+              onOrganizeWithCopilot={this._onSummarizeWithCopilot}
+              hasCopilotSuggestions={this.state.hasCopilotSuggestions}
+              onCopilotApprove={this._onCopilotApprove}
+              onCopilotDecline={this._onCopilotDecline}
+              onCopilotRetry={this._onCopilotRetry}
               onAssignLabels={this._onAssignLabels}
               onRemoveLabel={this._onRemoveLabel}
             />
@@ -174,12 +240,12 @@ export default class BookmarkHub extends React.Component<IBookmarkHubProps, IBoo
             />
           )}
 
-          {/* Temporary - useful while testing; let's remove later*/}
-          <h3 style={{ display: 'none' }}>Saved App Data - from OneDrive App Root</h3>
+          {/* Temporary view to remove later */}
+          {/* <h3>Saved App Data - from OneDrive App Root</h3>
           <pre className={styles.bookmarkHubPre}>
             {JSON.stringify(appData, null, 2)}
-          </pre>
-          {/* Temporary - useful while testing; let's remove later*/}
+          </pre> */}
+          {/* Temporary view to remove later */}
         </div>
       </section>
     );

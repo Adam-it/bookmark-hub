@@ -24,7 +24,8 @@ export default class BookmarkHubWebPart extends BaseClientSideWebPart<IBookmarkH
       {
         isDarkTheme: this._isDarkTheme,
         hasTeamsContext: !!this.context.sdks.microsoftTeams,
-        bookmarkHubService: this._bookmarkHubService
+        bookmarkHubService: this._bookmarkHubService,
+        context: this.context
       }
     );
 

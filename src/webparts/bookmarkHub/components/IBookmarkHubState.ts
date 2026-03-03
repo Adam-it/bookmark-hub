@@ -5,4 +5,5 @@ export interface IBookmarkHubState {
   bookmarks: IBookmark[];
   appData: IAppData;
   isLoading: boolean;
+  hasCopilotSuggestions: boolean;
 }

@@ -4,12 +4,68 @@
   margin-top: 1.5em;
 }
 
+.headerContainer {
+  border-bottom: 2px solid #edebe9;
+  padding-bottom: 0.25em;
+  margin-bottom: 0;
+}
+
 .header {
   font-size: 1.15em;
   font-weight: 600;
-  margin: 0 0 0.25em 0;
-  padding-bottom: 0.25em;
-  border-bottom: 2px solid #edebe9;
+  margin: 0;
+  padding: 0;
+  border-bottom: none;
+}
+
+.copilotButton {
+  background-color: #ffffff;
+  border: 1px solid #6264A7;
+  color: #6264A7;
+  border-radius: 4px;
+  font-weight: 600;
+
+  &:hover,
+  &:focus {
+    background-color: #f0f0fb;
+    border-color: #464775;
+    color: #464775;
+  }
+
+  i {
+    font-size: 16px;
+    color: #6264A7;
+  }
+}
+
+.approveButton {
+  background-color: #ffffff;
+  border: 1px solid #107C10;
+  color: #107C10;
+  border-radius: 4px;
+  font-weight: 600;
+
+  &:hover,
+  &:focus {
+    background-color: #f0fbf0;
+    border-color: #0b5e0b;
+    color: #0b5e0b;
+  }
+}
+
+.declineButton {
+  background-color: #ffffff;
+  border: 1px solid #a4262c;
+  color: #a4262c;
+  border-radius: 4px;
+  font-weight: 600;
+
+  &:hover,
+  &:focus {
+    background-color: #fbf0f0;
+    border-color: #7a1a1e;
+    color: #7a1a1e;
+  }
 }
 
 .list {

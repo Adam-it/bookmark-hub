@@ -21,4 +21,6 @@ export interface IBookmark {
         from?: string;
         author?: string;
     };
+    /** True when this entry was suggested by Copilot and has not yet been approved. */
+    suggestion?: boolean;
 }
