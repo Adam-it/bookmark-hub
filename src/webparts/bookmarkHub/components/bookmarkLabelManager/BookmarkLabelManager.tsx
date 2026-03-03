@@ -25,6 +25,7 @@ export default class BookmarkLabelManager extends React.Component<
       labelToDelete: undefined,
       nameError: '',
       colorError: '',
+      deleteError: '',
     };
   }
 
@@ -122,18 +123,33 @@ export default class BookmarkLabelManager extends React.Component<
   };
 
   private _openDeleteDialog = (label: IBookmarkLabel, index: number): void => {
-    this.setState({ isDeleteDialogOpen: true, labelToDelete: { label, index } });
+    this.setState({ isDeleteDialogOpen: true, labelToDelete: { label, index }, deleteError: '' });
   };
 
   private _closeDeleteDialog = (): void => {
-    this.setState({ isDeleteDialogOpen: false, labelToDelete: undefined });
+    this.setState({ isDeleteDialogOpen: false, labelToDelete: undefined, deleteError: '' });
   };
 
   private _confirmDelete = (): void => {
     const { labelToDelete } = this.state;
+    const { bookmarks } = this.props;
     
     if (!labelToDelete) 
       return;
+
+    const labelName = labelToDelete.label.name;
+    const bookmarksUsingLabel = bookmarks.filter(bm => 
+      bm.labels?.some(l => l.name === labelName)
+    );
+
+    if (bookmarksUsingLabel.length > 0) {
+      const count = bookmarksUsingLabel.length;
+      const pluralSuffix = count === 1 ? '' : 's';
+      this.setState({ 
+        deleteError: `Cannot delete this label. It is currently used by ${count} bookmark${pluralSuffix}. Please remove the label from all bookmarks first.` 
+      });
+      return;
+    }
 
     const updated = this.props.labels.filter((_, i) => i !== labelToDelete.index);
     this.props.onLabelsChanged(updated);
@@ -213,6 +229,7 @@ export default class BookmarkLabelManager extends React.Component<
       labelToDelete,
       nameError,
       colorError,
+      deleteError,
     } = this.state;
     const { labels } = this.props;
     const isEditing = editingIndex !== undefined;
@@ -329,6 +346,11 @@ export default class BookmarkLabelManager extends React.Component<
           }}
           modalProps={{ isBlocking: true }}
         >
+          {deleteError && (
+            <MessageBar messageBarType={MessageBarType.error} isMultiline>
+              {deleteError}
+            </MessageBar>
+          )}
           <DialogFooter>
             <PrimaryButton text="Delete" onClick={this._confirmDelete} />
             <DefaultButton text="Cancel" onClick={this._closeDeleteDialog} />

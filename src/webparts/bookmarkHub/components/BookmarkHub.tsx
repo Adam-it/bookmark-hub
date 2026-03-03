@@ -18,7 +18,7 @@ export default class BookmarkHub extends React.Component<IBookmarkHubProps, IBoo
 
     this.state = {
       bookmarks: [],
-      appData: {} as IAppData,
+      appData: { bookmarks: [], groups: [], labels: [] },
       isLoading: true,
     };
   }
@@ -70,6 +70,41 @@ export default class BookmarkHub extends React.Component<IBookmarkHubProps, IBoo
     }
   };
 
+  private _onAssignLabels = async (bookmark: IBookmark, labels: IBookmarkLabel[]): Promise<void> => {
+    const { appData } = this.state;
+    const existingBookmarks = appData?.bookmarks ?? [];
+    const existingIndex = existingBookmarks.findIndex(bm => bm.id === bookmark.id);
+    const updatedBookmark: IBookmark = { ...bookmark, labels };
+    const updatedBookmarks = existingIndex >= 0
+      ? existingBookmarks.map((bm, i) => i === existingIndex ? updatedBookmark : bm)
+      : [...existingBookmarks, updatedBookmark];
+    const updatedAppData: IAppData = { ...appData, bookmarks: updatedBookmarks };
+    this.setState({ appData: updatedAppData });
+    try {
+      await this.props.bookmarkHubService.saveAppData(updatedAppData);
+    } catch (error) {
+      console.error('Error assigning labels:', error);
+    }
+  };
+
+  private _onRemoveLabel = async (bookmark: IBookmark, labelToRemove: IBookmarkLabel): Promise<void> => {
+    const { appData } = this.state;
+    const existingBookmarks = appData?.bookmarks ?? [];
+    const existingIndex = existingBookmarks.findIndex(bm => bm.id === bookmark.id);
+    if (existingIndex < 0) return;
+    
+    const updatedLabels = (bookmark.labels ?? []).filter(l => l.name !== labelToRemove.name);
+    const updatedBookmark: IBookmark = { ...bookmark, labels: updatedLabels };
+    const updatedBookmarks = existingBookmarks.map((bm, i) => i === existingIndex ? updatedBookmark : bm);
+    const updatedAppData: IAppData = { ...appData, bookmarks: updatedBookmarks };
+    this.setState({ appData: updatedAppData });
+    try {
+      await this.props.bookmarkHubService.saveAppData(updatedAppData);
+    } catch (error) {
+      console.error('Error removing label:', error);
+    }
+  };
+
   private _onToggleGroupCollapse = async (group: IBookmarkGroup): Promise<void> => {
     const { appData } = this.state;
     const updatedGroups = (appData?.groups ?? []).map(g =>
@@ -94,7 +129,6 @@ export default class BookmarkHub extends React.Component<IBookmarkHubProps, IBoo
     }
   };
 
-  // TODO: added for testing - need to implement UI for rendering and saving bookmarks in the future
   public render(): React.ReactElement<IBookmarkHubProps> {
     const { bookmarks, appData, isLoading } = this.state;
 
@@ -104,6 +138,7 @@ export default class BookmarkHub extends React.Component<IBookmarkHubProps, IBoo
           <BookmarkHubToolbar
             groups={appData?.groups ?? []}
             labels={appData?.labels ?? []}
+            bookmarks={appData?.bookmarks ?? []}
             onGroupsChanged={this._onGroupsChanged}
             onLabelsChanged={this._onLabelsChanged}
           />
@@ -119,7 +154,10 @@ export default class BookmarkHub extends React.Component<IBookmarkHubProps, IBoo
               bookmarks={bookmarks}
               savedBookmarks={appData?.bookmarks ?? []}
               groups={appData?.groups ?? []}
+              availableLabels={appData?.labels ?? []}
               onAssignGroup={this._onAssignGroup}
+              onAssignLabels={this._onAssignLabels}
+              onRemoveLabel={this._onRemoveLabel}
             />
           )}
 
@@ -127,18 +165,21 @@ export default class BookmarkHub extends React.Component<IBookmarkHubProps, IBoo
             <SavedBookmarkGroups
               savedBookmarks={appData?.bookmarks ?? []}
               groups={appData?.groups ?? []}
+              availableLabels={appData?.labels ?? []}
               onAssignGroup={this._onAssignGroup}
               onRemoveBookmark={this._onRemoveBookmark}
               onToggleGroupCollapse={this._onToggleGroupCollapse}
+              onAssignLabels={this._onAssignLabels}
+              onRemoveLabel={this._onRemoveLabel}
             />
           )}
 
-          {/* Temporary view to remove later */}
-          <h3>Saved App Data - from OneDrive App Root</h3>
+          {/* Temporary - useful while testing; let's remove later*/}
+          <h3 style={{ display: 'none' }}>Saved App Data - from OneDrive App Root</h3>
           <pre className={styles.bookmarkHubPre}>
             {JSON.stringify(appData, null, 2)}
           </pre>
-          {/* Temporary view to remove later */}
+          {/* Temporary - useful while testing; let's remove later*/}
         </div>
       </section>
     );

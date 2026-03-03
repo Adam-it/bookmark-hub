@@ -8,6 +8,8 @@ import {
 import { IBookmark, BookmarkType } from '../../../../services/models/IBookmark';
 import { IBookmarkGroup } from '../../../../services/models/IBookmarkGroup';
 import { IBookmarkListProps } from './IBookmarkListProps';
+import { BookmarkLabel } from '../shared/BookmarkLabel';
+import { LabelSelector } from '../shared/LabelSelector';
 
 const PAGE_SIZE = 10;
 
@@ -15,6 +17,8 @@ interface IBookmarkListState {
   sortKey: 'title' | 'date' | undefined;
   isSortedDescending: boolean;
   currentPage: number;
+  labelSelectorTarget: HTMLElement | undefined;
+  selectedBookmark: IBookmark | undefined;
 }
 
 export default class BookmarkList extends React.Component<IBookmarkListProps, IBookmarkListState> {
@@ -25,6 +29,8 @@ export default class BookmarkList extends React.Component<IBookmarkListProps, IB
       sortKey: undefined,
       isSortedDescending: false,
       currentPage: 1,
+      labelSelectorTarget: undefined,
+      selectedBookmark: undefined,
     };
   }
 
@@ -41,12 +47,24 @@ export default class BookmarkList extends React.Component<IBookmarkListProps, IB
 
   private _getFilteredBookmarks(): IBookmark[] {
     const { bookmarks, savedBookmarks } = this.props;
+    
+    const savedBookmarksMap = new Map(savedBookmarks.map(bm => [bm.id, bm]));
+    
     const assignedIds = new Set(
       savedBookmarks
         .filter(bm => bm.groups && bm.groups.length > 0)
         .map(bm => bm.id)
     );
-    return bookmarks.filter(bm => !assignedIds.has(bm.id));
+    
+    return bookmarks
+      .filter(bm => !assignedIds.has(bm.id))
+      .map(bm => {
+        const savedBookmark = savedBookmarksMap.get(bm.id);
+        if (savedBookmark?.labels) {
+          return { ...bm, labels: savedBookmark.labels };
+        }
+        return bm;
+      });
   }
 
   private _getSortedBookmarks(): IBookmark[] {
@@ -111,13 +129,48 @@ export default class BookmarkList extends React.Component<IBookmarkListProps, IB
           </Link>
         ),
       },
+      // Description is empty for every item except sites, and it makes the list look empty, so hiding it for now - remove it if you agree
+      // {
+      //   key: 'description',
+      //   name: 'Description',
+      //   fieldName: 'description',
+      //   minWidth: 180,
+      //   isResizable: true,
+      //   onRender: (item: IBookmark) => <span>{item.description || '—'}</span>,
+      // },
       {
-        key: 'description',
-        name: 'Description',
-        fieldName: 'description',
-        minWidth: 180,
+        key: 'labels',
+        name: 'Labels',
+        fieldName: 'labels',
+        minWidth: 150,
+        maxWidth: 250,
         isResizable: true,
-        onRender: (item: IBookmark) => <span>{item.description || '—'}</span>,
+        onRender: (item: IBookmark) => {
+          const { onRemoveLabel } = this.props;
+          return (
+            <Stack horizontal wrap tokens={{ childrenGap: 4 }} verticalAlign="center">
+              {(item.labels ?? []).map((label) => (
+                <BookmarkLabel
+                  key={label.name}
+                  label={label}
+                  onRemove={(label) => onRemoveLabel(item, label).catch(console.error)}
+                />
+              ))}
+              <IconButton
+                iconProps={{ iconName: 'Add' }}
+                title="Add labels"
+                ariaLabel="Add labels"
+                styles={{ root: { height: 20, width: 20 } }}
+                onClick={(e) => {
+                  this.setState({
+                    labelSelectorTarget: e.currentTarget as HTMLElement,
+                    selectedBookmark: item
+                  });
+                }}
+              />
+            </Stack>
+          );
+        },
       },
       {
         key: 'date',
@@ -188,7 +241,8 @@ export default class BookmarkList extends React.Component<IBookmarkListProps, IB
   // ── render ───────────────────────────────────────────────────────────────
 
   public render(): React.ReactElement<IBookmarkListProps> {
-    const { currentPage } = this.state;
+    const { availableLabels, onAssignLabels } = this.props;
+    const { currentPage, labelSelectorTarget, selectedBookmark } = this.state;
     const sorted = this._getSortedBookmarks();
     const paged = sorted.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
 
@@ -215,6 +269,18 @@ export default class BookmarkList extends React.Component<IBookmarkListProps, IB
           >
             No unassigned bookmarks — all bookmarks have been assigned to a group.
           </MessageBar>
+        )}
+        
+        {labelSelectorTarget && selectedBookmark && (
+          <LabelSelector
+            targetElement={labelSelectorTarget}
+            availableLabels={availableLabels}
+            selectedLabels={selectedBookmark.labels ?? []}
+            onDismiss={() => this.setState({ labelSelectorTarget: undefined, selectedBookmark: undefined })}
+            onApply={(selectedLabels) => {
+              onAssignLabels(selectedBookmark, selectedLabels).catch(console.error);
+            }}
+          />
         )}
       </div>
     );

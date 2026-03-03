@@ -27,7 +27,7 @@ export default class BookmarkHubToolbar extends React.Component<IBookmarkHubTool
   private _closeLabelPanel = (): void => this.setState({ isLabelPanelOpen: false });
 
   public render(): React.ReactElement<IBookmarkHubToolbarProps> {
-    const { groups, labels, onGroupsChanged, onLabelsChanged } = this.props;
+    const { groups, labels, bookmarks, onGroupsChanged, onLabelsChanged } = this.props;
     const { isGroupPanelOpen, isLabelPanelOpen } = this.state;
 
     return (
@@ -69,6 +69,7 @@ export default class BookmarkHubToolbar extends React.Component<IBookmarkHubTool
         >
           <BookmarkLabelManager
             labels={labels}
+            bookmarks={bookmarks}
             onLabelsChanged={onLabelsChanged}
           />
         </Panel>

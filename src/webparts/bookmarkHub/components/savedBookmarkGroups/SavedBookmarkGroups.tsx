@@ -6,7 +6,10 @@ import {
 } from '@fluentui/react';
 import { IBookmark, BookmarkType } from '../../../../services/models/IBookmark';
 import { IBookmarkGroup } from '../../../../services/models/IBookmarkGroup';
+import { IBookmarkLabel } from '../../../../services/models/IBookmarkLabel';
 import { ISavedBookmarkGroupsProps } from './ISavedBookmarkGroupsProps';
+import { BookmarkLabel } from '../shared/BookmarkLabel';
+import { LabelSelector } from '../shared/LabelSelector';
 
 const PAGE_SIZE = 10;
 
@@ -18,6 +21,8 @@ interface IGroupTableState {
 
 interface ISavedBookmarkGroupsState {
   groupState: Record<number, IGroupTableState>;
+  labelSelectorTarget: HTMLElement | undefined;
+  selectedBookmark: IBookmark | undefined;
 }
 
 const defaultGroupState: IGroupTableState = {
@@ -30,7 +35,11 @@ export default class SavedBookmarkGroups extends React.Component<ISavedBookmarkG
 
   constructor(props: ISavedBookmarkGroupsProps) {
     super(props);
-    this.state = { groupState: {} };
+    this.state = { 
+      groupState: {},
+      labelSelectorTarget: undefined,
+      selectedBookmark: undefined
+    };
   }
 
   // ── helpers ──────────────────────────────────────────────────────────────
@@ -64,7 +73,7 @@ export default class SavedBookmarkGroups extends React.Component<ISavedBookmarkG
     sortKey: 'title' | 'date' | undefined,
     isSortedDescending: boolean,
   ): IColumn[] {
-    const { groups, onAssignGroup, onRemoveBookmark } = this.props;
+    const { groups, onAssignGroup, onRemoveBookmark, onRemoveLabel } = this.props;
     const groupOptions: IDropdownOption[] = groups
       .filter(g => !g.archived)
       .map(g => ({ key: g.index, text: g.name }));
@@ -108,14 +117,15 @@ export default class SavedBookmarkGroups extends React.Component<ISavedBookmarkG
           </Link>
         ),
       },
-      {
-        key: 'description',
-        name: 'Description',
-        fieldName: 'description',
-        minWidth: 180,
-        isResizable: true,
-        onRender: (item: IBookmark) => <span>{item.description || '—'}</span>,
-      },
+      // Description is empty for every item except sites, and it makes the list look empty, so hiding it for now - remove it if you agree
+      // {
+      //   key: 'description',
+      //   name: 'Description',
+      //   fieldName: 'description',
+      //   minWidth: 180,
+      //   isResizable: true,
+      //   onRender: (item: IBookmark) => <span>{item.description || '—'}</span>,
+      // },
       {
         key: 'date',
         name: 'Date',
@@ -137,11 +147,37 @@ export default class SavedBookmarkGroups extends React.Component<ISavedBookmarkG
         key: 'labels',
         name: 'Labels',
         fieldName: 'labels',
-        minWidth: 120,
-        maxWidth: 200,
+        minWidth: 150,
+        maxWidth: 250,
         isResizable: true,
-        // TODO: render assigned labels
-        onRender: (_item: IBookmark) => <span>—</span>,
+        onRender: (item: IBookmark) => {
+          const handleRemoveLabel = (label: IBookmarkLabel): void => {
+            onRemoveLabel(item, label).catch(console.error);
+          };
+          return (
+            <Stack horizontal wrap tokens={{ childrenGap: 4 }} verticalAlign="center">
+              {(item.labels ?? []).map((label) => (
+                <BookmarkLabel
+                  key={label.name}
+                  label={label}
+                  onRemove={handleRemoveLabel}
+                />
+              ))}
+              <IconButton
+                iconProps={{ iconName: 'Add' }}
+                title="Add labels"
+                ariaLabel="Add labels"
+                styles={{ root: { height: 20, width: 20 } }}
+                onClick={(e) => {
+                  this.setState({
+                    labelSelectorTarget: e.currentTarget as HTMLElement,
+                    selectedBookmark: item
+                  });
+                }}
+              />
+            </Stack>
+          );
+        },
       },
       {
         key: 'group',
@@ -204,7 +240,8 @@ export default class SavedBookmarkGroups extends React.Component<ISavedBookmarkG
   // ── render ────────────────────────────────────────────────────────────────
 
   public render(): React.ReactElement<ISavedBookmarkGroupsProps> | null {
-    const { savedBookmarks, groups } = this.props;
+    const { savedBookmarks, groups, availableLabels, onAssignLabels } = this.props;
+    const { labelSelectorTarget, selectedBookmark } = this.state;
 
     const sections = groups
       .filter(g => !g.archived)
@@ -255,6 +292,18 @@ export default class SavedBookmarkGroups extends React.Component<ISavedBookmarkG
             </div>
           );
         })}
+        
+        {labelSelectorTarget && selectedBookmark && (
+          <LabelSelector
+            targetElement={labelSelectorTarget}
+            availableLabels={availableLabels}
+            selectedLabels={selectedBookmark.labels ?? []}
+            onDismiss={() => this.setState({ labelSelectorTarget: undefined, selectedBookmark: undefined })}
+            onApply={(selectedLabels) => {
+              onAssignLabels(selectedBookmark, selectedLabels).catch(console.error);
+            }}
+          />
+        )}
       </>
     );
   }
