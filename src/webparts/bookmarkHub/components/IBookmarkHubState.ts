@@ -6,4 +6,5 @@ export interface IBookmarkHubState {
   appData: IAppData;
   isLoading: boolean;
   hasCopilotSuggestions: boolean;
+  searchQuery: string;
 }

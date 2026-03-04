@@ -32,6 +32,12 @@ export default class BookmarkList extends React.Component<IBookmarkListProps, IB
     };
   }
 
+  public componentDidUpdate(prevProps: IBookmarkListProps): void {
+    if (prevProps.searchQuery !== this.props.searchQuery) {
+      this.setState({ currentPage: 1 });
+    }
+  }
+
   private _getTypeIcon(type: BookmarkType): string {
     switch (type) {
       case BookmarkType.Site:  return 'Globe';
@@ -42,7 +48,7 @@ export default class BookmarkList extends React.Component<IBookmarkListProps, IB
   }
 
   private _getFilteredBookmarks(): IBookmark[] {
-    const { bookmarks, savedBookmarks } = this.props;
+    const { bookmarks, savedBookmarks, searchQuery } = this.props;
     
     const savedBookmarksMap = new Map(savedBookmarks.map(bm => [bm.id, bm]));
     
@@ -52,7 +58,7 @@ export default class BookmarkList extends React.Component<IBookmarkListProps, IB
         .map(bm => bm.id)
     );
     
-    return bookmarks
+    let filtered = bookmarks
       .filter(bm => !assignedIds.has(bm.id))
       .map(bm => {
         const savedBookmark = savedBookmarksMap.get(bm.id);
@@ -61,6 +67,15 @@ export default class BookmarkList extends React.Component<IBookmarkListProps, IB
         }
         return bm;
       });
+    
+    if (searchQuery && searchQuery.trim() !== '') {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter(bm => 
+        bm.title.toLowerCase().includes(query)
+      );
+    }
+    
+    return filtered;
   }
 
   private _getSortedBookmarks(): IBookmark[] {
@@ -241,7 +256,7 @@ export default class BookmarkList extends React.Component<IBookmarkListProps, IB
 
   public render(): React.ReactElement<IBookmarkListProps> {
     const { currentPage, isCopilotLoading, labelSelectorTarget, selectedBookmark } = this.state;
-    const { hasCopilotSuggestions, onCopilotApprove, onCopilotDecline, savedBookmarks, availableLabels, onAssignLabels } = this.props;
+    const { hasCopilotSuggestions, onCopilotApprove, onCopilotDecline, savedBookmarks, availableLabels, onAssignLabels, searchQuery } = this.props;
     const sorted = this._getSortedBookmarks();
     const paged = sorted.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
 
@@ -325,7 +340,9 @@ export default class BookmarkList extends React.Component<IBookmarkListProps, IB
             isMultiline={false}
             className={styles.emptyState}
           >
-            No unassigned bookmarks — all bookmarks have been assigned to a group.
+            {searchQuery && searchQuery.trim() !== '' 
+              ? 'No bookmarks match your search.'
+              : 'No unassigned bookmarks - all bookmarks have been assigned to a group.'}
           </MessageBar>
         )}
         

@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { DefaultButton, Panel, PanelType, Stack, IStackTokens } from '@fluentui/react';
+import { DefaultButton, Panel, PanelType, Stack, IStackTokens, SearchBox } from '@fluentui/react';
 import { IBookmarkHubToolbarProps } from './IBookmarkHubToolbarProps';
 import BookmarkGroupManager from '../bookmarkGroupManager/BookmarkGroupManager';
 import BookmarkLabelManager from '../bookmarkLabelManager/BookmarkLabelManager';
@@ -21,28 +21,36 @@ export default class BookmarkHubToolbar extends React.Component<IBookmarkHubTool
     };
   }
 
-  private _openGroupPanel  = (): void => this.setState({ isGroupPanelOpen: true });
+  private _openGroupPanel = (): void => this.setState({ isGroupPanelOpen: true });
   private _closeGroupPanel = (): void => this.setState({ isGroupPanelOpen: false });
-  private _openLabelPanel  = (): void => this.setState({ isLabelPanelOpen: true });
+  private _openLabelPanel = (): void => this.setState({ isLabelPanelOpen: true });
   private _closeLabelPanel = (): void => this.setState({ isLabelPanelOpen: false });
 
   public render(): React.ReactElement<IBookmarkHubToolbarProps> {
-    const { groups, labels, bookmarks, onGroupsChanged, onLabelsChanged } = this.props;
+    const { groups, labels, bookmarks, onGroupsChanged, onLabelsChanged, searchQuery, onSearchChange } = this.props;
     const { isGroupPanelOpen, isLabelPanelOpen } = this.state;
 
     return (
       <>
-        <Stack horizontal tokens={toolbarTokens} horizontalAlign="end">
-          <DefaultButton
-            iconProps={{ iconName: 'GroupList' }}
-            text="Manage Groups"
-            onClick={this._openGroupPanel}
+        <Stack horizontal tokens={toolbarTokens} horizontalAlign="space-between" verticalAlign="center" styles={{ root: { marginBottom: 16 } }}>
+          <SearchBox
+            placeholder="Search bookmarks..."
+            onChange={onSearchChange}
+            value={searchQuery}
+            styles={{ root: { width: 300 } }}
           />
-          <DefaultButton
-            iconProps={{ iconName: 'Tag' }}
-            text="Manage Labels"
-            onClick={this._openLabelPanel}
-          />
+          <Stack horizontal tokens={toolbarTokens}>
+            <DefaultButton
+              iconProps={{ iconName: 'GroupList' }}
+              text="Manage Groups"
+              onClick={this._openGroupPanel}
+            />
+            <DefaultButton
+              iconProps={{ iconName: 'Tag' }}
+              text="Manage Labels"
+              onClick={this._openLabelPanel}
+            />
+          </Stack>
         </Stack>
 
         <Panel

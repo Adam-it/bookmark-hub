@@ -8,4 +8,6 @@ export interface IBookmarkHubToolbarProps {
   bookmarks: IBookmark[];
   onGroupsChanged: (groups: IBookmarkGroup[]) => Promise<void>;
   onLabelsChanged: (labels: IBookmarkLabel[]) => Promise<void>;
+  searchQuery: string;
+  onSearchChange: (event?: React.ChangeEvent<HTMLInputElement>, newValue?: string) => void;
 }

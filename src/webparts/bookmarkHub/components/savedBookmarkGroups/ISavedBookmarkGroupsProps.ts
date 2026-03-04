@@ -11,4 +11,5 @@ export interface ISavedBookmarkGroupsProps {
   onToggleGroupCollapse: (group: IBookmarkGroup) => Promise<void>;
   onAssignLabels: (bookmark: IBookmark, labels: IBookmarkLabel[]) => Promise<void>;
   onRemoveLabel: (bookmark: IBookmark, label: IBookmarkLabel) => Promise<void>;
+  searchQuery: string;
 }
