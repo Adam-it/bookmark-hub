@@ -5,7 +5,7 @@ import type { IBookmarkHubProps } from './IBookmarkHubProps';
 import { IBookmarkHubState } from './IBookmarkHubState';
 import { IBookmarkGroup } from '../../../services/models/IBookmarkGroup';
 import { IBookmarkLabel } from '../../../services/models/IBookmarkLabel';
-import { Spinner, SpinnerSize } from '@fluentui/react';
+import { Spinner, SpinnerSize, Text } from '@fluentui/react';
 import { IBookmark } from '../../../services/models/IBookmark';
 import BookmarkHubToolbar from './bookmarkHubToolbar/BookmarkHubToolbar';
 import BookmarkList from './bookmarkList/BookmarkList';
@@ -23,6 +23,7 @@ export default class BookmarkHub extends React.Component<IBookmarkHubProps, IBoo
       appData: { bookmarks: [], groups: [], labels: [] },
       isLoading: true,
       hasCopilotSuggestions: false,
+      searchQuery: '',
     };
   }
 
@@ -190,18 +191,33 @@ export default class BookmarkHub extends React.Component<IBookmarkHubProps, IBoo
     }
   };
 
+  private _onSearchChange = (_event?: React.ChangeEvent<HTMLInputElement>, newValue?: string): void => {
+    this.setState({ searchQuery: newValue || '' });
+  };
+
   public render(): React.ReactElement<IBookmarkHubProps> {
-    const { bookmarks, appData, isLoading } = this.state;
+    const { bookmarks, appData, isLoading, searchQuery } = this.state;
 
     return (
       <section className={styles.bookmarkHub}>
         <div>
+          <div style={{ marginBottom: 24 }}>
+            <Text variant="xLarge" block style={{ fontWeight: 600, marginBottom: 4 }}>
+              Bookmark Hub
+            </Text>
+            <Text variant="medium" block style={{ color: '#605e5c' }}>
+              Unified view across Microsoft 365
+            </Text>
+          </div>
+
           <BookmarkHubToolbar
             groups={appData?.groups ?? []}
             labels={appData?.labels ?? []}
             bookmarks={appData?.bookmarks ?? []}
             onGroupsChanged={this._onGroupsChanged}
             onLabelsChanged={this._onLabelsChanged}
+            searchQuery={searchQuery}
+            onSearchChange={this._onSearchChange}
           />
 
           {isLoading ? (
@@ -224,6 +240,7 @@ export default class BookmarkHub extends React.Component<IBookmarkHubProps, IBoo
               onCopilotRetry={this._onCopilotRetry}
               onAssignLabels={this._onAssignLabels}
               onRemoveLabel={this._onRemoveLabel}
+              searchQuery={searchQuery}
             />
           )}
 
@@ -237,6 +254,7 @@ export default class BookmarkHub extends React.Component<IBookmarkHubProps, IBoo
               onToggleGroupCollapse={this._onToggleGroupCollapse}
               onAssignLabels={this._onAssignLabels}
               onRemoveLabel={this._onRemoveLabel}
+              searchQuery={searchQuery}
             />
           )}
 

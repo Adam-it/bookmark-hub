@@ -43,6 +43,18 @@ export default class SavedBookmarkGroups extends React.Component<ISavedBookmarkG
     };
   }
 
+  public componentDidUpdate(prevProps: ISavedBookmarkGroupsProps): void {
+    // Reset all groups to page 1 when search query changes
+    if (prevProps.searchQuery !== this.props.searchQuery) {
+      const resetGroupState: Record<number, IGroupTableState> = {};
+      Object.keys(this.state.groupState).forEach(key => {
+        const groupIndex = Number(key);
+        resetGroupState[groupIndex] = { ...this.state.groupState[groupIndex], currentPage: 1 };
+      });
+      this.setState({ groupState: resetGroupState });
+    }
+  }
+
   private _getGroupState(groupIndex: number): IGroupTableState {
     return this.state.groupState[groupIndex] ?? defaultGroupState;
   }
@@ -225,15 +237,21 @@ export default class SavedBookmarkGroups extends React.Component<ISavedBookmarkG
 
   // eslint-disable-next-line @rushstack/no-new-null
   public render(): React.ReactElement<ISavedBookmarkGroupsProps> | null {
-    const { savedBookmarks, groups, availableLabels, onAssignLabels } = this.props;
+    const { savedBookmarks, groups, availableLabels, onAssignLabels, searchQuery } = this.props;
     const { labelSelectorTarget, selectedBookmark } = this.state;
 
     const sections = groups
       .filter(g => !g.archived)
-      .map(group => ({
-        group,
-        items: savedBookmarks.filter(bm => bm.groups?.some(g => g.id === group.id)),
-      }))
+      .map(group => {
+        let items = savedBookmarks.filter(bm => bm.groups?.some(g => g.id === group.id));
+        
+        if (searchQuery && searchQuery.trim() !== '') {
+          const query = searchQuery.toLowerCase();
+          items = items.filter(bm => bm.title.toLowerCase().includes(query));
+        }
+        
+        return { group, items };
+      })
       .filter(s => s.items.length > 0);
 
     if (sections.length === 0) return null;

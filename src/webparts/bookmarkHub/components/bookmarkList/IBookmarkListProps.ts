@@ -15,4 +15,5 @@ export interface IBookmarkListProps {
   onCopilotRetry: () => Promise<void>;
   onAssignLabels: (bookmark: IBookmark, labels: IBookmarkLabel[]) => Promise<void>;
   onRemoveLabel: (bookmark: IBookmark, label: IBookmarkLabel) => Promise<void>;
+  searchQuery: string;
 }
