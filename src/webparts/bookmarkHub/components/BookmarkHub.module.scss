@@ -23,13 +23,18 @@
 
   .savedGroupSection {
     margin-top: 2em;
+    background-color: #ffffff;
+    border-radius: 8px;
+    padding: 1.25em;
+    border: 1px solid #edebe9;
+    box-shadow: 0 1.6px 3.6px 0 rgba(0, 0, 0, 0.132), 0 0.3px 0.9px 0 rgba(0, 0, 0, 0.108);
   }
 
   .savedGroupTitle {
-    margin: 0 0 0.25em 0;
+    margin: 0 0 0.75em 0;
     font-size: 1.1em;
     border-bottom: 2px solid #edebe9;
-    padding-bottom: 0.25em;
+    padding-bottom: 0.5em;
   }
 
   .pagination {

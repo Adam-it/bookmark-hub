@@ -3,6 +3,7 @@ import styles from './SavedBookmarkGroups.module.scss';
 import {
   DetailsList, IColumn, SelectionMode, Link, Icon,
   IconButton, Text, Stack, Dropdown, IDropdownOption,
+  DetailsRow, IDetailsRowProps,
 } from '@fluentui/react';
 import { IBookmark, BookmarkType } from '../../../../services/models/IBookmark';
 import { IBookmarkGroup } from '../../../../services/models/IBookmarkGroup';
@@ -42,8 +43,6 @@ export default class SavedBookmarkGroups extends React.Component<ISavedBookmarkG
     };
   }
 
-  // ── helpers ──────────────────────────────────────────────────────────────
-
   private _getGroupState(groupIndex: number): IGroupTableState {
     return this.state.groupState[groupIndex] ?? defaultGroupState;
   }
@@ -65,8 +64,6 @@ export default class SavedBookmarkGroups extends React.Component<ISavedBookmarkG
       default:                 return 'Bookmark';
     }
   }
-
-  // ── columns ──────────────────────────────────────────────────────────────
 
   private _buildColumns(
     groupIndex: number,
@@ -203,8 +200,6 @@ export default class SavedBookmarkGroups extends React.Component<ISavedBookmarkG
     ];
   }
 
-  // ── pagination ────────────────────────────────────────────────────────────
-
   private _renderPagination(groupIndex: number, totalItems: number): React.ReactElement | null {
     const { currentPage } = this._getGroupState(groupIndex);
     const totalPages = Math.ceil(totalItems / PAGE_SIZE);
@@ -228,8 +223,7 @@ export default class SavedBookmarkGroups extends React.Component<ISavedBookmarkG
     );
   }
 
-  // ── render ────────────────────────────────────────────────────────────────
-
+  // eslint-disable-next-line @rushstack/no-new-null
   public render(): React.ReactElement<ISavedBookmarkGroupsProps> | null {
     const { savedBookmarks, groups, availableLabels, onAssignLabels } = this.props;
     const { labelSelectorTarget, selectedBookmark } = this.state;
@@ -266,7 +260,10 @@ export default class SavedBookmarkGroups extends React.Component<ISavedBookmarkG
                   ariaLabel={group.collapsed ? 'Expand group' : 'Collapse group'}
                   onClick={() => this.props.onToggleGroupCollapse(group).catch(console.error)}
                 />
-                <Text variant="mediumPlus" className={styles.groupTitle}>{group.name}</Text>
+                <Text variant="mediumPlus" className={group.suggestion ? styles.suggestionGroupTitle : styles.groupTitle}>{group.name}</Text>
+                {group.suggestion && (
+                  <Icon iconName="Lightbulb" title="Copilot suggestion" styles={{ root: { color: '#f0a500', marginLeft: 6 } }} />
+                )}
               </Stack>
               {!group.collapsed && (
                 <>
@@ -276,6 +273,18 @@ export default class SavedBookmarkGroups extends React.Component<ISavedBookmarkG
                     selectionMode={SelectionMode.none}
                     isHeaderVisible={true}
                     className={styles.list}
+                    onRenderRow={(rowProps: IDetailsRowProps | undefined) => {
+                      if (!rowProps) return null;
+                      const item = rowProps.item as IBookmark;
+                      return (
+                        <DetailsRow
+                          {...rowProps}
+                          styles={item.suggestion ? {
+                            root: { borderLeft: '3px solid #f0a500', backgroundColor: '#fffcf0' }
+                          } : undefined}
+                        />
+                      );
+                    }}
                   />
                   {this._renderPagination(group.index, sorted.length)}
                 </>
