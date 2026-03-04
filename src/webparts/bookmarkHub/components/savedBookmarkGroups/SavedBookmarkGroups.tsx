@@ -43,6 +43,18 @@ export default class SavedBookmarkGroups extends React.Component<ISavedBookmarkG
     };
   }
 
+  public componentDidUpdate(prevProps: ISavedBookmarkGroupsProps): void {
+    // Reset all groups to page 1 when search query changes
+    if (prevProps.searchQuery !== this.props.searchQuery) {
+      const resetGroupState: Record<number, IGroupTableState> = {};
+      Object.keys(this.state.groupState).forEach(key => {
+        const groupIndex = Number(key);
+        resetGroupState[groupIndex] = { ...this.state.groupState[groupIndex], currentPage: 1 };
+      });
+      this.setState({ groupState: resetGroupState });
+    }
+  }
+
   private _getGroupState(groupIndex: number): IGroupTableState {
     return this.state.groupState[groupIndex] ?? defaultGroupState;
   }
