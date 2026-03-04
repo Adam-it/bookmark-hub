@@ -35,6 +35,7 @@ function buildOrganizePrompt(rawBookmarks: IBookmark[], appData: IAppData): stri
 function extractTextFromResponse(response: CopilotConversation): string {
   if (!response) return "";
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const r = response as any;
 
   const candidates: string[] = [

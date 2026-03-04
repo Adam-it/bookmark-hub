@@ -122,6 +122,23 @@ export default class BookmarkList extends React.Component<IBookmarkListProps, IB
         ),
       },
       {
+        key: 'date',
+        name: 'Date',
+        fieldName: 'date',
+        minWidth: 100,
+        maxWidth: 120,
+        isSorted: sortKey === 'date',
+        isSortedDescending: sortKey === 'date' && isSortedDescending,
+        onColumnClick: this._onColumnHeaderClick,
+        onRender: (item: IBookmark) => {
+          const d = new Date(item.date);
+          const label = isNaN(d.getTime())
+            ? item.date
+            : d.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+          return <span>{label}</span>;
+        },
+      },
+      {
         key: 'labels',
         name: 'Labels',
         fieldName: 'labels',
@@ -153,23 +170,6 @@ export default class BookmarkList extends React.Component<IBookmarkListProps, IB
               />
             </Stack>
           );
-        },
-      },
-      {
-        key: 'date',
-        name: 'Date',
-        fieldName: 'date',
-        minWidth: 100,
-        maxWidth: 120,
-        isSorted: sortKey === 'date',
-        isSortedDescending: sortKey === 'date' && isSortedDescending,
-        onColumnClick: this._onColumnHeaderClick,
-        onRender: (item: IBookmark) => {
-          const d = new Date(item.date);
-          const label = isNaN(d.getTime())
-            ? item.date
-            : d.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
-          return <span>{label}</span>;
         },
       },
       {

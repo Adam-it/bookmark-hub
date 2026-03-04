@@ -13,7 +13,6 @@ export class CopilotChatService implements ICopilotChatService {
 
   public static async init(msGraphClientFactory: MSGraphClientFactory): Promise<void> {
     CopilotChatService._msGraphClient = await msGraphClientFactory.getClient("3");
-    // console.log("[CopilotChatService] Microsoft Graph client initialized successfully");
   }
 
   public static async CreateCopilotConversation(): Promise<CopilotConversation> {
@@ -21,21 +20,18 @@ export class CopilotChatService implements ICopilotChatService {
       throw new Error("Microsoft Graph client has not been initialized. Call CopilotChatService.init() first.");
     }
     try {
-    //   console.log("[CopilotChatService] Creating new Copilot conversation...");
       const conversation: CopilotConversation = await CopilotChatService._msGraphClient
         .api("/copilot/conversations")
         .version("beta")
         .post({});
-    //   console.log("[CopilotChatService] Conversation created:", conversation.id);
       return conversation;
     } catch (error) {
+      const msg = error instanceof Error ? error.message : "Unknown error";
       console.error("[CopilotChatService] Error creating conversation:", error);
-      if (error && typeof error === "object" && "statusCode" in error) {
-        console.error("[CopilotChatService] Error body:", (error as any).body);
+      if (error && typeof error === "object" && "statusCode" in error && "body" in error) {
+        console.error("[CopilotChatService] Error body:", (error as Record<string, unknown>).body);
       }
-      throw new Error(
-        `Failed to create Copilot conversation: ${error instanceof Error ? error.message : "Unknown error"}`
-      );
+      throw new Error(`Failed to create Copilot conversation: ${msg}`);
     }
   }
 
@@ -61,7 +57,6 @@ export class CopilotChatService implements ICopilotChatService {
     }
 
     try {
-    //   console.log("[CopilotChatService] Sending message to conversation:", conversationId);
       const requestBody: ChatMessageRequest = {
         message: {
           text: messageText.trim(),
@@ -103,13 +98,11 @@ export class CopilotChatService implements ICopilotChatService {
         .version("beta")
         .post(requestBody);
 
-    //   console.log("[CopilotChatService] Message sent. Turn count:", response.turnCount);
       return response;
     } catch (error) {
+      const msg = error instanceof Error ? error.message : "Unknown error";
       console.error("[CopilotChatService] Error sending chat message:", error);
-      throw new Error(
-        `Failed to send chat message: ${error instanceof Error ? error.message : "Unknown error"}`
-      );
+      throw new Error(`Failed to send chat message: ${msg}`);
     }
   }
 

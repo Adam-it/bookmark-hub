@@ -223,6 +223,7 @@ export default class SavedBookmarkGroups extends React.Component<ISavedBookmarkG
     );
   }
 
+  // eslint-disable-next-line @rushstack/no-new-null
   public render(): React.ReactElement<ISavedBookmarkGroupsProps> | null {
     const { savedBookmarks, groups, availableLabels, onAssignLabels } = this.props;
     const { labelSelectorTarget, selectedBookmark } = this.state;
