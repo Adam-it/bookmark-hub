@@ -12,4 +12,5 @@ export interface ISavedBookmarkGroupsProps {
   onAssignLabels: (bookmark: IBookmark, labels: IBookmarkLabel[]) => Promise<void>;
   onRemoveLabel: (bookmark: IBookmark, label: IBookmarkLabel) => Promise<void>;
   searchQuery: string;
+  activeLabelFilters: string[];
 }

@@ -44,8 +44,8 @@ export default class SavedBookmarkGroups extends React.Component<ISavedBookmarkG
   }
 
   public componentDidUpdate(prevProps: ISavedBookmarkGroupsProps): void {
-    // Reset all groups to page 1 when search query changes
-    if (prevProps.searchQuery !== this.props.searchQuery) {
+    // Reset all groups to page 1 when search query or label filter changes
+    if (prevProps.searchQuery !== this.props.searchQuery || prevProps.activeLabelFilters !== this.props.activeLabelFilters) {
       const resetGroupState: Record<number, IGroupTableState> = {};
       Object.keys(this.state.groupState).forEach(key => {
         const groupIndex = Number(key);
@@ -237,7 +237,7 @@ export default class SavedBookmarkGroups extends React.Component<ISavedBookmarkG
 
   // eslint-disable-next-line @rushstack/no-new-null
   public render(): React.ReactElement<ISavedBookmarkGroupsProps> | null {
-    const { savedBookmarks, groups, availableLabels, onAssignLabels, searchQuery } = this.props;
+    const { savedBookmarks, groups, availableLabels, onAssignLabels, searchQuery, activeLabelFilters } = this.props;
     const { labelSelectorTarget, selectedBookmark } = this.state;
 
     const sections = groups
@@ -248,6 +248,12 @@ export default class SavedBookmarkGroups extends React.Component<ISavedBookmarkG
         if (searchQuery && searchQuery.trim() !== '') {
           const query = searchQuery.toLowerCase();
           items = items.filter(bm => bm.title.toLowerCase().includes(query));
+        }
+
+        if (activeLabelFilters.length > 0) {
+          items = items.filter(bm =>
+            activeLabelFilters.every(name => (bm.labels ?? []).some(l => l.name === name))
+          );
         }
         
         return { group, items };

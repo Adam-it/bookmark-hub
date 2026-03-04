@@ -7,4 +7,5 @@ export interface IBookmarkHubState {
   isLoading: boolean;
   hasCopilotSuggestions: boolean;
   searchQuery: string;
+  activeLabelFilters: string[];
 }

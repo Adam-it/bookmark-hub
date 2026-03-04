@@ -33,7 +33,7 @@ export default class BookmarkList extends React.Component<IBookmarkListProps, IB
   }
 
   public componentDidUpdate(prevProps: IBookmarkListProps): void {
-    if (prevProps.searchQuery !== this.props.searchQuery) {
+    if (prevProps.searchQuery !== this.props.searchQuery || prevProps.activeLabelFilters !== this.props.activeLabelFilters) {
       this.setState({ currentPage: 1 });
     }
   }
@@ -48,7 +48,7 @@ export default class BookmarkList extends React.Component<IBookmarkListProps, IB
   }
 
   private _getFilteredBookmarks(): IBookmark[] {
-    const { bookmarks, savedBookmarks, searchQuery } = this.props;
+    const { bookmarks, savedBookmarks, searchQuery, activeLabelFilters } = this.props;
     
     const savedBookmarksMap = new Map(savedBookmarks.map(bm => [bm.id, bm]));
     
@@ -74,7 +74,13 @@ export default class BookmarkList extends React.Component<IBookmarkListProps, IB
         bm.title.toLowerCase().includes(query)
       );
     }
-    
+
+    if (activeLabelFilters.length > 0) {
+      filtered = filtered.filter(bm =>
+        activeLabelFilters.every(name => (bm.labels ?? []).some(l => l.name === name))
+      );
+    }
+
     return filtered;
   }
 

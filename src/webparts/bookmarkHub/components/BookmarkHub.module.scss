@@ -45,4 +45,50 @@
   .emptyState {
     margin-top: 1em;
   }
+
+  .labelFilters {
+    margin-top: 12px;
+    margin-bottom: 4px;
+  }
+
+  .labelFilterPill {
+    cursor: pointer;
+    border-radius: 14px;
+    outline: 2px solid transparent;
+    opacity: 0.65;
+    transition: opacity 0.15s ease, outline-color 0.15s ease, box-shadow 0.15s ease;
+
+    &:hover {
+      opacity: 0.85;
+      box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.2);
+    }
+
+    &:focus {
+      outline-color: #0078d4;
+    }
+  }
+
+  .labelFilterPillActive {
+    cursor: pointer;
+    border-radius: 14px;
+    opacity: 1;
+    outline: 2px solid #0078d4;
+    box-shadow: 0 0 0 1px #0078d4;
+    transition: opacity 0.15s ease, outline-color 0.15s ease, box-shadow 0.15s ease;
+
+    &:focus {
+      outline-color: #005a9e;
+    }
+  }
+
+  .clearFiltersButton {
+    height: 28px;
+    color: #605e5c;
+    font-size: 12px;
+    padding: 0 8px;
+
+    &:hover {
+      color: #323130;
+    }
+  }
 }
