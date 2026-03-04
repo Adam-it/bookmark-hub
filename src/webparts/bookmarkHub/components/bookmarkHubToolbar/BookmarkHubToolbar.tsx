@@ -35,6 +35,7 @@ export default class BookmarkHubToolbar extends React.Component<IBookmarkHubTool
         <Stack horizontal tokens={toolbarTokens} horizontalAlign="space-between" verticalAlign="center" styles={{ root: { marginBottom: 16 } }}>
           <SearchBox
             placeholder="Search bookmarks..."
+            ariaLabel="Search bookmarks"
             onChange={onSearchChange}
             value={searchQuery}
             styles={{ root: { width: 300 } }}
