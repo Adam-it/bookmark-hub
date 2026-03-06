@@ -7,6 +7,18 @@
   padding: 1.25em;
   border: 1px solid #edebe9;
   box-shadow: 0 1.6px 3.6px 0 rgba(0, 0, 0, 0.132), 0 0.3px 0.9px 0 rgba(0, 0, 0, 0.108);
+  cursor: move;
+  transition: opacity 0.2s, transform 0.2s;
+
+  &.dragging {
+    opacity: 0.5;
+    transform: scale(0.98);
+  }
+
+  &.dragOver {
+    border: 2px dashed #0078d4;
+    background-color: #f3f9fd;
+  }
 }
 
 .groupHeader {
