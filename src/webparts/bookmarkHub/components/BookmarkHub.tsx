@@ -5,8 +5,9 @@ import type { IBookmarkHubProps } from './IBookmarkHubProps';
 import { IBookmarkHubState } from './IBookmarkHubState';
 import { IBookmarkGroup } from '../../../services/models/IBookmarkGroup';
 import { IBookmarkLabel } from '../../../services/models/IBookmarkLabel';
-import { Spinner, SpinnerSize, Text } from '@fluentui/react';
+import { ActionButton, Spinner, SpinnerSize, Stack, Text } from '@fluentui/react';
 import { IBookmark } from '../../../services/models/IBookmark';
+import { BookmarkLabel } from './shared/BookmarkLabel';
 import BookmarkHubToolbar from './bookmarkHubToolbar/BookmarkHubToolbar';
 import BookmarkList from './bookmarkList/BookmarkList';
 import SavedBookmarkGroups from './savedBookmarkGroups/SavedBookmarkGroups';
@@ -24,6 +25,7 @@ export default class BookmarkHub extends React.Component<IBookmarkHubProps, IBoo
       isLoading: true,
       hasCopilotSuggestions: false,
       searchQuery: '',
+      activeLabelFilters: [],
     };
   }
 
@@ -196,7 +198,7 @@ export default class BookmarkHub extends React.Component<IBookmarkHubProps, IBoo
   };
 
   public render(): React.ReactElement<IBookmarkHubProps> {
-    const { bookmarks, appData, isLoading, searchQuery } = this.state;
+    const { bookmarks, appData, isLoading, searchQuery, activeLabelFilters } = this.state;
 
     return (
       <section className={styles.bookmarkHub}>
@@ -220,6 +222,50 @@ export default class BookmarkHub extends React.Component<IBookmarkHubProps, IBoo
             onSearchChange={this._onSearchChange}
           />
 
+          {!isLoading && (() => {
+            const usedLabelNames = new Set<string>();
+            (appData?.bookmarks ?? []).forEach(bm => {
+              (bm.labels ?? []).forEach(l => usedLabelNames.add(l.name));
+            });
+            const filterLabels = (appData?.labels ?? []).filter(l => usedLabelNames.has(l.name));
+            if (filterLabels.length === 0) return null;
+            return (
+              <Stack horizontal wrap verticalAlign="center" tokens={{ childrenGap: 6 }} className={styles.labelFilters}>
+                {filterLabels.map(label => {
+                  const isActive = activeLabelFilters.indexOf(label.name) !== -1;
+                  const toggle = (): void => {
+                    const next = isActive
+                      ? activeLabelFilters.filter(n => n !== label.name)
+                      : [...activeLabelFilters, label.name];
+                    this.setState({ activeLabelFilters: next });
+                  };
+                  return (
+                    <div
+                      key={label.name}
+                      role="button"
+                      tabIndex={0}
+                      className={isActive ? styles.labelFilterPillActive : styles.labelFilterPill}
+                      onClick={toggle}
+                      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') toggle(); }}
+                      title={isActive ? `Remove "${label.name}" filter` : `Filter by "${label.name}"`}
+                    >
+                      <BookmarkLabel label={label} showRemove={false} />
+                    </div>
+                  );
+                })}
+                {activeLabelFilters.length > 0 && (
+                  <ActionButton
+                    iconProps={{ iconName: 'ClearFilter' }}
+                    className={styles.clearFiltersButton}
+                    onClick={() => this.setState({ activeLabelFilters: [] })}
+                  >
+                    Clear filters
+                  </ActionButton>
+                )}
+              </Stack>
+            );
+          })()}
+
           {isLoading ? (
             <Spinner
               size={SpinnerSize.large}
@@ -241,6 +287,7 @@ export default class BookmarkHub extends React.Component<IBookmarkHubProps, IBoo
               onAssignLabels={this._onAssignLabels}
               onRemoveLabel={this._onRemoveLabel}
               searchQuery={searchQuery}
+              activeLabelFilters={activeLabelFilters}
             />
           )}
 
@@ -255,6 +302,7 @@ export default class BookmarkHub extends React.Component<IBookmarkHubProps, IBoo
               onAssignLabels={this._onAssignLabels}
               onRemoveLabel={this._onRemoveLabel}
               searchQuery={searchQuery}
+              activeLabelFilters={activeLabelFilters}
             />
           )}
 
