@@ -239,17 +239,24 @@ export default class SavedBookmarkGroups extends React.Component<ISavedBookmarkG
     );
   }
 
-  private _handleDragStart = (e: React.DragEvent<HTMLDivElement>, groupIndex: number): void => {
+  private _handleDragStart = (e: React.DragEvent<HTMLElement>, groupIndex: number): void => {
     this.setState({ draggedGroupIndex: groupIndex });
     e.dataTransfer.effectAllowed = 'move';
-    e.dataTransfer.setData('text/html', e.currentTarget.innerHTML);
+    e.dataTransfer.setData('text/plain', String(groupIndex));
   };
 
   private _handleDragOver = (e: React.DragEvent<HTMLDivElement>, groupIndex: number): void => {
     e.preventDefault();
     e.dataTransfer.dropEffect = 'move';
-    if (this.state.dragOverGroupIndex !== groupIndex) {
+    const { draggedGroupIndex, dragOverGroupIndex } = this.state;
+    if (draggedGroupIndex !== groupIndex && dragOverGroupIndex !== groupIndex) {
       this.setState({ dragOverGroupIndex: groupIndex });
+    }
+  };
+
+  private _handleDragLeave = (e: React.DragEvent<HTMLDivElement>): void => {
+    if (e.currentTarget === e.target || !e.currentTarget.contains(e.relatedTarget as Node)) {
+      this.setState({ dragOverGroupIndex: undefined });
     }
   };
 
@@ -345,13 +352,27 @@ export default class SavedBookmarkGroups extends React.Component<ISavedBookmarkG
             <div 
               key={group.index} 
               className={groupSectionClass}
-              draggable={true}
-              onDragStart={(e) => this._handleDragStart(e, group.index)}
               onDragOver={(e) => this._handleDragOver(e, group.index)}
+              onDragLeave={this._handleDragLeave}
               onDrop={(e) => this._handleDrop(e, group.index)}
-              onDragEnd={this._handleDragEnd}
             >
               <Stack horizontal verticalAlign="center" className={styles.groupHeader}>
+                <Icon
+                  iconName="GripperDotsVertical"
+                  title="Drag to reorder"
+                  draggable={true}
+                  onDragStart={(e) => this._handleDragStart(e, group.index)}
+                  onDragEnd={this._handleDragEnd}
+                  styles={{ 
+                    root: { 
+                      fontSize: 14, 
+                      color: '#605e5c', 
+                      cursor: 'grab', 
+                      padding: '0 4px',
+                      ':hover': { color: '#323130' }
+                    } 
+                  }}
+                />
                 <IconButton
                   iconProps={{ iconName: group.collapsed ? 'ChevronRight' : 'ChevronDown' }}
                   ariaLabel={group.collapsed ? 'Expand group' : 'Collapse group'}
