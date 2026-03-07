@@ -99,7 +99,7 @@ export default class BookmarkHub extends React.Component<IBookmarkHubProps, IBoo
     const existingBookmarks = appData?.bookmarks ?? [];
     const existingIndex = existingBookmarks.findIndex(bm => bm.id === bookmark.id);
     if (existingIndex < 0) return;
-    
+
     const updatedLabels = (bookmark.labels ?? []).filter(l => l.name !== labelToRemove.name);
     const updatedBookmark: IBookmark = { ...bookmark, labels: updatedLabels };
     const updatedBookmarks = existingBookmarks.map((bm, i) => i === existingIndex ? updatedBookmark : bm);
@@ -203,68 +203,72 @@ export default class BookmarkHub extends React.Component<IBookmarkHubProps, IBoo
     return (
       <section className={styles.bookmarkHub}>
         <div>
-          <div style={{ marginBottom: 24 }}>
-            <Text variant="xLarge" block style={{ fontWeight: 600, marginBottom: 4 }}>
-              Bookmark Hub
-            </Text>
-            <Text variant="medium" block style={{ color: '#605e5c' }}>
-              Unified view across Microsoft 365
-            </Text>
-          </div>
+          <div className={styles.toolbarGroupSection}>
+            <div style={{ marginBottom: 24 }}>
+              <Text variant="xLarge" block style={{ fontWeight: 600, marginBottom: 4 }}>
+                Bookmark Hub
+              </Text>
+              <Text variant="medium" block style={{ color: '#605e5c' }}>
+                Unified view across Microsoft 365
+              </Text>
+            </div>
 
-          <BookmarkHubToolbar
-            groups={appData?.groups ?? []}
-            labels={appData?.labels ?? []}
-            bookmarks={appData?.bookmarks ?? []}
-            onGroupsChanged={this._onGroupsChanged}
-            onLabelsChanged={this._onLabelsChanged}
-            searchQuery={searchQuery}
-            onSearchChange={this._onSearchChange}
-          />
+            <BookmarkHubToolbar
+              groups={appData?.groups ?? []}
+              labels={appData?.labels ?? []}
+              bookmarks={appData?.bookmarks ?? []}
+              onGroupsChanged={this._onGroupsChanged}
+              onLabelsChanged={this._onLabelsChanged}
+              searchQuery={searchQuery}
+              onSearchChange={this._onSearchChange}
+            />
 
-          {!isLoading && (() => {
-            const usedLabelNames = new Set<string>();
-            (appData?.bookmarks ?? []).forEach(bm => {
-              (bm.labels ?? []).forEach(l => usedLabelNames.add(l.name));
-            });
-            const filterLabels = (appData?.labels ?? []).filter(l => usedLabelNames.has(l.name));
-            if (filterLabels.length === 0) return null;
-            return (
-              <Stack horizontal wrap verticalAlign="center" tokens={{ childrenGap: 6 }} className={styles.labelFilters}>
-                {filterLabels.map(label => {
-                  const isActive = activeLabelFilters.indexOf(label.name) !== -1;
-                  const toggle = (): void => {
-                    const next = isActive
-                      ? activeLabelFilters.filter(n => n !== label.name)
-                      : [...activeLabelFilters, label.name];
-                    this.setState({ activeLabelFilters: next });
-                  };
-                  return (
-                    <div
-                      key={label.name}
-                      role="button"
-                      tabIndex={0}
-                      className={isActive ? styles.labelFilterPillActive : styles.labelFilterPill}
-                      onClick={toggle}
-                      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') toggle(); }}
-                      title={isActive ? `Remove "${label.name}" filter` : `Filter by "${label.name}"`}
+
+            {!isLoading && (() => {
+              const usedLabelNames = new Set<string>();
+              (appData?.bookmarks ?? []).forEach(bm => {
+                (bm.labels ?? []).forEach(l => usedLabelNames.add(l.name));
+              });
+              const filterLabels = (appData?.labels ?? []).filter(l => usedLabelNames.has(l.name));
+              if (filterLabels.length === 0) return null;
+              return (
+                <Stack horizontal wrap verticalAlign="center" tokens={{ childrenGap: 6 }} className={styles.labelFilters}>
+                  {filterLabels.map(label => {
+                    const isActive = activeLabelFilters.indexOf(label.name) !== -1;
+                    const toggle = (): void => {
+                      const next = isActive
+                        ? activeLabelFilters.filter(n => n !== label.name)
+                        : [...activeLabelFilters, label.name];
+                      this.setState({ activeLabelFilters: next });
+                    };
+                    return (
+                      <div
+                        key={label.name}
+                        role="button"
+                        tabIndex={0}
+                        className={isActive ? styles.labelFilterPillActive : styles.labelFilterPill}
+                        onClick={toggle}
+                        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') toggle(); }}
+                        title={isActive ? `Remove "${label.name}" filter` : `Filter by "${label.name}"`}
+                      >
+                        <BookmarkLabel label={label} showRemove={false} />
+                      </div>
+                    );
+                  })}
+                  {activeLabelFilters.length > 0 && (
+                    <ActionButton
+                      iconProps={{ iconName: 'ClearFilter' }}
+                      className={styles.clearFiltersButton}
+                      onClick={() => this.setState({ activeLabelFilters: [] })}
                     >
-                      <BookmarkLabel label={label} showRemove={false} />
-                    </div>
-                  );
-                })}
-                {activeLabelFilters.length > 0 && (
-                  <ActionButton
-                    iconProps={{ iconName: 'ClearFilter' }}
-                    className={styles.clearFiltersButton}
-                    onClick={() => this.setState({ activeLabelFilters: [] })}
-                  >
-                    Clear filters
-                  </ActionButton>
-                )}
-              </Stack>
-            );
-          })()}
+                      Clear filters
+                    </ActionButton>
+                  )}
+                </Stack>
+              );
+            })()}
+
+          </div>
 
           {isLoading ? (
             <Spinner
@@ -299,6 +303,7 @@ export default class BookmarkHub extends React.Component<IBookmarkHubProps, IBoo
               onAssignGroup={this._onAssignGroup}
               onRemoveBookmark={this._onRemoveBookmark}
               onToggleGroupCollapse={this._onToggleGroupCollapse}
+              onReorderGroups={this._onGroupsChanged}
               onAssignLabels={this._onAssignLabels}
               onRemoveLabel={this._onRemoveLabel}
               searchQuery={searchQuery}

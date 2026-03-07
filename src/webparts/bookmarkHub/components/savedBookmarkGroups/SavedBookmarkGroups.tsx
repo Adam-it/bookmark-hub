@@ -24,6 +24,8 @@ interface ISavedBookmarkGroupsState {
   groupState: Record<number, IGroupTableState>;
   labelSelectorTarget: HTMLElement | undefined;
   selectedBookmark: IBookmark | undefined;
+  draggedGroupIndex: number | undefined;
+  dragOverGroupIndex: number | undefined;
 }
 
 const defaultGroupState: IGroupTableState = {
@@ -39,7 +41,9 @@ export default class SavedBookmarkGroups extends React.Component<ISavedBookmarkG
     this.state = { 
       groupState: {},
       labelSelectorTarget: undefined,
-      selectedBookmark: undefined
+      selectedBookmark: undefined,
+      draggedGroupIndex: undefined,
+      dragOverGroupIndex: undefined
     };
   }
 
@@ -235,6 +239,68 @@ export default class SavedBookmarkGroups extends React.Component<ISavedBookmarkG
     );
   }
 
+  private _handleDragStart = (e: React.DragEvent<HTMLElement>, groupIndex: number): void => {
+    this.setState({ draggedGroupIndex: groupIndex });
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', String(groupIndex));
+  };
+
+  private _handleDragOver = (e: React.DragEvent<HTMLDivElement>, groupIndex: number): void => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    const { draggedGroupIndex, dragOverGroupIndex } = this.state;
+    if (draggedGroupIndex !== groupIndex && dragOverGroupIndex !== groupIndex) {
+      this.setState({ dragOverGroupIndex: groupIndex });
+    }
+  };
+
+  private _handleDragLeave = (e: React.DragEvent<HTMLDivElement>): void => {
+    if (e.currentTarget === e.target || !e.currentTarget.contains(e.relatedTarget as Node)) {
+      this.setState({ dragOverGroupIndex: undefined });
+    }
+  };
+
+  private _handleDrop = async (e: React.DragEvent<HTMLDivElement>, dropGroupIndex: number): Promise<void> => {
+    e.preventDefault();
+    const { draggedGroupIndex } = this.state;
+    
+    if (draggedGroupIndex === undefined || draggedGroupIndex === dropGroupIndex) {
+      this.setState({ draggedGroupIndex: undefined, dragOverGroupIndex: undefined });
+      return;
+    }
+
+    const visibleGroups = this.props.groups.filter(g => !g.archived);
+    const archivedGroups = this.props.groups.filter(g => g.archived);
+    
+    const draggedGroupActualIndex = visibleGroups.findIndex(g => g.index === draggedGroupIndex);
+    const dropGroupActualIndex = visibleGroups.findIndex(g => g.index === dropGroupIndex);
+    
+    if (draggedGroupActualIndex === -1 || dropGroupActualIndex === -1) {
+      this.setState({ draggedGroupIndex: undefined, dragOverGroupIndex: undefined });
+      return;
+    }
+    
+    const draggedGroup = visibleGroups[draggedGroupActualIndex];
+    
+    const reorderedGroups = [...visibleGroups];
+    reorderedGroups.splice(draggedGroupActualIndex, 1);
+    reorderedGroups.splice(dropGroupActualIndex, 0, draggedGroup);
+    
+    const allGroups = [...reorderedGroups, ...archivedGroups];
+    
+    this.setState({ draggedGroupIndex: undefined, dragOverGroupIndex: undefined });
+    
+    try {
+      await this.props.onReorderGroups(allGroups);
+    } catch (error) {
+      console.error('Error reordering groups:', error);
+    }
+  };
+
+  private _handleDragEnd = (): void => {
+    this.setState({ draggedGroupIndex: undefined, dragOverGroupIndex: undefined });
+  };
+
   // eslint-disable-next-line @rushstack/no-new-null
   public render(): React.ReactElement<ISavedBookmarkGroupsProps> | null {
     const { savedBookmarks, groups, availableLabels, onAssignLabels, searchQuery, activeLabelFilters } = this.props;
@@ -262,6 +328,8 @@ export default class SavedBookmarkGroups extends React.Component<ISavedBookmarkG
 
     if (sections.length === 0) return null;
 
+    const { draggedGroupIndex, dragOverGroupIndex } = this.state;
+
     return (
       <>
         {sections.map(({ group, items }) => {
@@ -276,9 +344,35 @@ export default class SavedBookmarkGroups extends React.Component<ISavedBookmarkG
             : items;
           const paged = sorted.slice((gs.currentPage - 1) * PAGE_SIZE, gs.currentPage * PAGE_SIZE);
 
+          const isDragging = draggedGroupIndex === group.index;
+          const isDragOver = dragOverGroupIndex === group.index;
+          const groupSectionClass = `${styles.groupSection} ${isDragging ? styles.dragging : ''} ${isDragOver ? styles.dragOver : ''}`;
+
           return (
-            <div key={group.index} className={styles.groupSection}>
+            <div 
+              key={group.index} 
+              className={groupSectionClass}
+              onDragOver={(e) => this._handleDragOver(e, group.index)}
+              onDragLeave={this._handleDragLeave}
+              onDrop={(e) => this._handleDrop(e, group.index)}
+            >
               <Stack horizontal verticalAlign="center" className={styles.groupHeader}>
+                <Icon
+                  iconName="GripperDotsVertical"
+                  title="Drag to reorder"
+                  draggable={true}
+                  onDragStart={(e) => this._handleDragStart(e, group.index)}
+                  onDragEnd={this._handleDragEnd}
+                  styles={{ 
+                    root: { 
+                      fontSize: 14, 
+                      color: '#605e5c', 
+                      cursor: 'grab', 
+                      padding: '0 4px',
+                      ':hover': { color: '#323130' }
+                    } 
+                  }}
+                />
                 <IconButton
                   iconProps={{ iconName: group.collapsed ? 'ChevronRight' : 'ChevronDown' }}
                   ariaLabel={group.collapsed ? 'Expand group' : 'Collapse group'}
