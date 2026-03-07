@@ -10,8 +10,15 @@ import { IAppData } from "./models/IAppData";
 export class BookmarkHubService implements IBookmarkHubService {
     private static _appDataFolderName: string = 'BookmarkHub';
     private static _appDataFileName: string = 'bookmarks.json';
+    private static _cacheTTL: number = 5 * 60 * 1000;
+
+    private _bookmarksCache: { data: IBookmark[], timestamp: number } | null = null;
 
     public async getAllBookmarks(): Promise<IBookmark[]> {
+        if (this._isCacheValid()) {
+            return this._bookmarksCache!.data;
+        }
+
         try {
             const [sites, emails, files] = await Promise.all([
                 this._getFollowedSites(),
@@ -25,13 +32,29 @@ export class BookmarkHubService implements IBookmarkHubService {
                 ...files.map(file => this._mapFileToBookmark(file))
             ];
 
-            return bookmarks.sort((a, b) =>
+            const sortedBookmarks = bookmarks.sort((a, b) =>
                 new Date(b.date).getTime() - new Date(a.date).getTime()
             );
+
+            this._bookmarksCache = {
+                data: sortedBookmarks,
+                timestamp: Date.now()
+            };
+
+            return sortedBookmarks;
         } catch (error) {
             console.error('Error getting bookmarks:', error);
             return [];
         }
+    }
+
+    public clearBookmarksCache(): void {
+        this._bookmarksCache = null;
+    }
+
+    private _isCacheValid(): boolean {
+        return this._bookmarksCache !== null &&
+               (Date.now() - this._bookmarksCache.timestamp) < BookmarkHubService._cacheTTL;
     }
 
     public async getAppData(): Promise<IAppData> {
