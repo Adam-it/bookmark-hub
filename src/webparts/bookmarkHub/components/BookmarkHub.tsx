@@ -112,6 +112,18 @@ export default class BookmarkHub extends React.Component<IBookmarkHubProps, IBoo
     }
   };
 
+  private _onBookmarkAdded = async (bookmark: IBookmark): Promise<void> => {
+    const { appData } = this.state;
+    const updatedBookmarks = [...(appData?.bookmarks ?? []), bookmark];
+    const updatedAppData: IAppData = { ...appData, bookmarks: updatedBookmarks };
+    this.setState({ appData: updatedAppData });
+    try {
+      await this.props.bookmarkHubService.saveAppData(updatedAppData);
+    } catch (error) {
+      console.error('Error adding bookmark:', error);
+    }
+  };
+
   private _onToggleGroupCollapse = async (group: IBookmarkGroup): Promise<void> => {
     const { appData } = this.state;
     const updatedGroups = (appData?.groups ?? []).map(g =>
@@ -219,6 +231,7 @@ export default class BookmarkHub extends React.Component<IBookmarkHubProps, IBoo
               bookmarks={appData?.bookmarks ?? []}
               onGroupsChanged={this._onGroupsChanged}
               onLabelsChanged={this._onLabelsChanged}
+              onBookmarkAdded={this._onBookmarkAdded}
               searchQuery={searchQuery}
               onSearchChange={this._onSearchChange}
             />

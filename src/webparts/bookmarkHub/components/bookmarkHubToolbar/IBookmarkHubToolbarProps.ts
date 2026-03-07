@@ -9,6 +9,7 @@ export interface IBookmarkHubToolbarProps {
   bookmarks: IBookmark[];
   onGroupsChanged: (groups: IBookmarkGroup[]) => Promise<void>;
   onLabelsChanged: (labels: IBookmarkLabel[]) => Promise<void>;
+  onBookmarkAdded: (bookmark: IBookmark) => Promise<void>;
   searchQuery: string;
   onSearchChange: (event?: ChangeEvent<HTMLInputElement>, newValue?: string) => void;
 }
