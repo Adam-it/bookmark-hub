@@ -68,6 +68,13 @@ export default class BookmarkList extends React.Component<IBookmarkListProps, IB
         return bm;
       });
     
+    const automaticBookmarkIds = new Set(bookmarks.map(bm => bm.id));
+    const customBookmarks = savedBookmarks
+      .filter(bm => !automaticBookmarkIds.has(bm.id) && !assignedIds.has(bm.id))
+      .map(bm => ({ ...bm }));
+    
+    filtered = [...filtered, ...customBookmarks];
+    
     if (searchQuery && searchQuery.trim() !== '') {
       const query = searchQuery.toLowerCase();
       filtered = filtered.filter(bm => 
