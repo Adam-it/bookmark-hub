@@ -141,14 +141,14 @@ export default class AddBookmarkManager extends React.Component<
       <Dialog
         hidden={!isFormDialogOpen}
         onDismiss={this._closeFormDialog}
+        minWidth={500}
         dialogContentProps={{
-          type: DialogType.normal,
+          type: DialogType.largeHeader,
           title: 'Add Custom Bookmark',
           subText: 'Create a new bookmark with custom details.',
         }}
         modalProps={{
           isBlocking: false,
-          styles: { main: { maxWidth: 450 } },
         }}
       >
         <Stack tokens={formStackTokens}>
