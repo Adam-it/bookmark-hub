@@ -23,4 +23,6 @@ export interface IBookmark {
     };
     /** True when this entry was suggested by Copilot and has not yet been approved. */
     suggestion?: boolean;
+    isCustom?: boolean;
+    removedFromBackend?: boolean;
 }

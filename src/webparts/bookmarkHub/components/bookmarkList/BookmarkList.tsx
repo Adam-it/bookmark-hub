@@ -62,8 +62,13 @@ export default class BookmarkList extends React.Component<IBookmarkListProps, IB
       .filter(bm => !assignedIds.has(bm.id))
       .map(bm => {
         const savedBookmark = savedBookmarksMap.get(bm.id);
-        if (savedBookmark?.labels) {
-          return { ...bm, labels: savedBookmark.labels };
+        if (savedBookmark) {
+          return { 
+            ...bm, 
+            labels: savedBookmark.labels,
+            removedFromBackend: savedBookmark.removedFromBackend,
+            isCustom: savedBookmark.isCustom
+          };
         }
         return bm;
       });
@@ -125,13 +130,26 @@ export default class BookmarkList extends React.Component<IBookmarkListProps, IB
         fieldName: 'type',
         minWidth: 36,
         maxWidth: 36,
-        onRender: (item: IBookmark) => (
-          <Icon
-            iconName={this._getTypeIcon(item.type)}
-            title={item.type}
-            styles={{ root: { fontSize: 16, verticalAlign: 'middle' } }}
-          />
-        ),
+        onRender: (item: IBookmark) => {
+          const isRemoved = item.removedFromBackend === true && item.isCustom !== true;
+          
+          return (
+            <Stack horizontal tokens={{ childrenGap: 4 }} verticalAlign="center">
+              <Icon
+                iconName={this._getTypeIcon(item.type)}
+                title={item.type}
+                styles={{ root: { fontSize: 16, verticalAlign: 'middle' } }}
+              />
+              {isRemoved && (
+                <Icon
+                  iconName="Warning"
+                  title="This item no longer exists in the backend (unfollowed, unflagged, etc.)"
+                  styles={{ root: { fontSize: 14, color: '#d13438' } }}
+                />
+              )}
+            </Stack>
+          );
+        },
       },
       {
         key: 'title',
@@ -204,8 +222,8 @@ export default class BookmarkList extends React.Component<IBookmarkListProps, IB
         key: 'group',
         name: 'Assign Group',
         fieldName: 'group',
-        minWidth: 100,
-        maxWidth: 100,
+        minWidth: 120,
+        maxWidth: 200,
         onRender: (item: IBookmark) => (
           <Stack horizontal verticalAlign="center" tokens={{ childrenGap: 4 }}>
             <Dropdown
@@ -213,7 +231,7 @@ export default class BookmarkList extends React.Component<IBookmarkListProps, IB
               placeholder="Assign to group..."
               selectedKey={null}
               options={groupOptions}
-              styles={{ root: { minWidth: 150 } }}
+              styles={{ root: { minWidth: 120, width: '100%' } }}
               onChange={(_ev, option) => {
                 if (!option) return;
                 const group = groups.find((g: IBookmarkGroup) => g.index === option.key);
@@ -335,14 +353,34 @@ export default class BookmarkList extends React.Component<IBookmarkListProps, IB
                 if (!rowProps) return null;
                 const item = rowProps.item as IBookmark;
                 const savedEntry = savedBookmarks.find(bm => bm.id === item.id);
-                return (
-                  <DetailsRow
-                    {...rowProps}
-                    styles={savedEntry?.suggestion ? {
-                      root: { borderLeft: '3px solid #f0a500', backgroundColor: '#fffcf0' }
-                    } : undefined}
-                  />
-                );
+                
+                if (savedEntry?.removedFromBackend) {
+                  return (
+                    <DetailsRow
+                      {...rowProps}
+                      styles={{
+                        root: { 
+                          borderLeft: '3px solid #d13438', 
+                          backgroundColor: '#fef6f6',
+                          opacity: 0.85 
+                        }
+                      }}
+                    />
+                  );
+                }
+                
+                if (savedEntry?.suggestion) {
+                  return (
+                    <DetailsRow
+                      {...rowProps}
+                      styles={{
+                        root: { borderLeft: '3px solid #f0a500', backgroundColor: '#fffcf0' }
+                      }}
+                    />
+                  );
+                }
+                
+                return <DetailsRow {...rowProps} />;
               }}
             />
             {this._renderPagination(sorted.length)}

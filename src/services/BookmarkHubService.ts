@@ -34,6 +34,40 @@ export class BookmarkHubService implements IBookmarkHubService {
         }
     }
 
+    public async getMergedBookmarks(): Promise<{ backendBookmarks: IBookmark[], appData: IAppData }> {
+        try {
+            const [backendBookmarks, appData] = await Promise.all([
+                this.getAllBookmarks(),
+                this.getAppData()
+            ]);
+
+            const backendIds = new Set(backendBookmarks.map(bm => bm.id));
+
+            const updatedSavedBookmarks = appData.bookmarks.map(savedBm => {
+                if (savedBm.isCustom === true) {
+                    return { ...savedBm, removedFromBackend: false };
+                }
+                if (!backendIds.has(savedBm.id)) {
+                    return { ...savedBm, removedFromBackend: true };
+                }
+                return { ...savedBm, removedFromBackend: false };
+            });
+
+            const updatedAppData: IAppData = {
+                ...appData,
+                bookmarks: updatedSavedBookmarks
+            };
+
+            return { backendBookmarks, appData: updatedAppData };
+        } catch (error) {
+            console.error('Error getting merged bookmarks:', error);
+            return { 
+                backendBookmarks: [], 
+                appData: { bookmarks: [], groups: [], labels: [] } 
+            };
+        }
+    }
+
     public async getAppData(): Promise<IAppData> {
         try {
             const folderId = await this._ensureAppDataFolder();
