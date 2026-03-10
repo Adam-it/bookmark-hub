@@ -3,7 +3,7 @@ import styles from './SavedBookmarkGroups.module.scss';
 import {
   DetailsList, IColumn, SelectionMode, Link, Icon,
   IconButton, Text, Stack, Dropdown, IDropdownOption,
-  DetailsRow, IDetailsRowProps,
+  DetailsRow, IDetailsRowProps, DetailsListLayoutMode,
 } from '@fluentui/react';
 import { IBookmark, BookmarkType } from '../../../../services/models/IBookmark';
 import { IBookmarkGroup } from '../../../../services/models/IBookmarkGroup';
@@ -38,7 +38,7 @@ export default class SavedBookmarkGroups extends React.Component<ISavedBookmarkG
 
   constructor(props: ISavedBookmarkGroupsProps) {
     super(props);
-    this.state = { 
+    this.state = {
       groupState: {},
       labelSelectorTarget: undefined,
       selectedBookmark: undefined,
@@ -74,10 +74,10 @@ export default class SavedBookmarkGroups extends React.Component<ISavedBookmarkG
 
   private _getTypeIcon(type: BookmarkType): string {
     switch (type) {
-      case BookmarkType.Site:  return 'Globe';
+      case BookmarkType.Site: return 'Globe';
       case BookmarkType.Email: return 'Mail';
-      case BookmarkType.File:  return 'Document';
-      default:                 return 'Bookmark';
+      case BookmarkType.File: return 'Document';
+      default: return 'Bookmark';
     }
   }
 
@@ -106,21 +106,35 @@ export default class SavedBookmarkGroups extends React.Component<ISavedBookmarkG
         fieldName: 'type',
         minWidth: 36,
         maxWidth: 36,
-        onRender: (item: IBookmark) => (
-          <Icon
-            iconName={this._getTypeIcon(item.type)}
-            title={item.type}
-            styles={{ root: { fontSize: 16, verticalAlign: 'middle' } }}
-          />
-        ),
+        onRender: (item: IBookmark) => {
+          const isRemoved = item.removedFromBackend === true && item.isCustom !== true;
+
+          return (
+            <Stack horizontal tokens={{ childrenGap: 4 }} verticalAlign="center">
+              <Icon
+                iconName={this._getTypeIcon(item.type)}
+                title={item.type}
+                styles={{ root: { fontSize: 16, verticalAlign: 'middle' } }}
+              />
+              {isRemoved && (
+                <Icon
+                  iconName="Warning"
+                  title="This item no longer exists in the backend (unfollowed, unflagged, etc.)"
+                  styles={{ root: { fontSize: 14, color: '#d13438' } }}
+                />
+              )}
+            </Stack>
+          );
+        },
       },
       {
         key: 'title',
         name: 'Title',
         fieldName: 'title',
         minWidth: 150,
-        maxWidth: 260,
+        maxWidth: 200,
         isResizable: true,
+        flexGrow: 1,
         isSorted: sortKey === 'title',
         isSortedDescending: sortKey === 'title' && isSortedDescending,
         onColumnClick,
@@ -134,8 +148,8 @@ export default class SavedBookmarkGroups extends React.Component<ISavedBookmarkG
         key: 'date',
         name: 'Date',
         fieldName: 'date',
-        minWidth: 100,
-        maxWidth: 120,
+        minWidth: 90,
+        maxWidth: 110,
         isSorted: sortKey === 'date',
         isSortedDescending: sortKey === 'date' && isSortedDescending,
         onColumnClick,
@@ -151,9 +165,10 @@ export default class SavedBookmarkGroups extends React.Component<ISavedBookmarkG
         key: 'labels',
         name: 'Labels',
         fieldName: 'labels',
-        minWidth: 150,
-        maxWidth: 250,
+        minWidth: 100,
+        maxWidth: 400,
         isResizable: true,
+        flexGrow: 1,
         onRender: (item: IBookmark) => {
           const handleRemoveLabel = (label: IBookmarkLabel): void => {
             onRemoveLabel(item, label).catch(console.error);
@@ -187,8 +202,9 @@ export default class SavedBookmarkGroups extends React.Component<ISavedBookmarkG
         key: 'group',
         name: 'Change Group',
         fieldName: 'group',
-        minWidth: 220,
-        maxWidth: 300,
+        minWidth: 60,
+        maxWidth: 80,
+        isResizable: true,
         onRender: (item: IBookmark) => (
           <Stack horizontal verticalAlign="center" tokens={{ childrenGap: 4 }}>
             <Dropdown
@@ -196,7 +212,7 @@ export default class SavedBookmarkGroups extends React.Component<ISavedBookmarkG
               placeholder="Change group..."
               selectedKey={null}
               options={groupOptions}
-              styles={{ root: { minWidth: 150 } }}
+              styles={{ root: { minWidth: 30, width: '100%' } }}
               onChange={(_ev, option) => {
                 if (!option) return;
                 const group = groups.find((g: IBookmarkGroup) => g.index === option.key);
@@ -263,7 +279,7 @@ export default class SavedBookmarkGroups extends React.Component<ISavedBookmarkG
   private _handleDrop = async (e: React.DragEvent<HTMLDivElement>, dropGroupIndex: number): Promise<void> => {
     e.preventDefault();
     const { draggedGroupIndex } = this.state;
-    
+
     if (draggedGroupIndex === undefined || draggedGroupIndex === dropGroupIndex) {
       this.setState({ draggedGroupIndex: undefined, dragOverGroupIndex: undefined });
       return;
@@ -271,25 +287,25 @@ export default class SavedBookmarkGroups extends React.Component<ISavedBookmarkG
 
     const visibleGroups = this.props.groups.filter(g => !g.archived);
     const archivedGroups = this.props.groups.filter(g => g.archived);
-    
+
     const draggedGroupActualIndex = visibleGroups.findIndex(g => g.index === draggedGroupIndex);
     const dropGroupActualIndex = visibleGroups.findIndex(g => g.index === dropGroupIndex);
-    
+
     if (draggedGroupActualIndex === -1 || dropGroupActualIndex === -1) {
       this.setState({ draggedGroupIndex: undefined, dragOverGroupIndex: undefined });
       return;
     }
-    
+
     const draggedGroup = visibleGroups[draggedGroupActualIndex];
-    
+
     const reorderedGroups = [...visibleGroups];
     reorderedGroups.splice(draggedGroupActualIndex, 1);
     reorderedGroups.splice(dropGroupActualIndex, 0, draggedGroup);
-    
+
     const allGroups = [...reorderedGroups, ...archivedGroups];
-    
+
     this.setState({ draggedGroupIndex: undefined, dragOverGroupIndex: undefined });
-    
+
     try {
       await this.props.onReorderGroups(allGroups);
     } catch (error) {
@@ -310,7 +326,7 @@ export default class SavedBookmarkGroups extends React.Component<ISavedBookmarkG
       .filter(g => !g.archived)
       .map(group => {
         let items = savedBookmarks.filter(bm => bm.groups?.some(g => g.id === group.id));
-        
+
         if (searchQuery && searchQuery.trim() !== '') {
           const query = searchQuery.toLowerCase();
           items = items.filter(bm => bm.title.toLowerCase().includes(query));
@@ -321,7 +337,7 @@ export default class SavedBookmarkGroups extends React.Component<ISavedBookmarkG
             activeLabelFilters.every(name => (bm.labels ?? []).some(l => l.name === name))
           );
         }
-        
+
         return { group, items };
       })
       .filter(s => s.items.length > 0);
@@ -336,11 +352,11 @@ export default class SavedBookmarkGroups extends React.Component<ISavedBookmarkG
           const gs = this._getGroupState(group.index);
           const sorted = gs.sortKey
             ? [...items].sort((a, b) => {
-                let cmp = 0;
-                if (gs.sortKey === 'title') cmp = a.title.localeCompare(b.title);
-                else if (gs.sortKey === 'date') cmp = new Date(a.date).getTime() - new Date(b.date).getTime();
-                return gs.isSortedDescending ? -cmp : cmp;
-              })
+              let cmp = 0;
+              if (gs.sortKey === 'title') cmp = a.title.localeCompare(b.title);
+              else if (gs.sortKey === 'date') cmp = new Date(a.date).getTime() - new Date(b.date).getTime();
+              return gs.isSortedDescending ? -cmp : cmp;
+            })
             : items;
           const paged = sorted.slice((gs.currentPage - 1) * PAGE_SIZE, gs.currentPage * PAGE_SIZE);
 
@@ -349,8 +365,8 @@ export default class SavedBookmarkGroups extends React.Component<ISavedBookmarkG
           const groupSectionClass = `${styles.groupSection} ${isDragging ? styles.dragging : ''} ${isDragOver ? styles.dragOver : ''}`;
 
           return (
-            <div 
-              key={group.index} 
+            <div
+              key={group.index}
               className={groupSectionClass}
               onDragOver={(e) => this._handleDragOver(e, group.index)}
               onDragLeave={this._handleDragLeave}
@@ -363,14 +379,14 @@ export default class SavedBookmarkGroups extends React.Component<ISavedBookmarkG
                   draggable={true}
                   onDragStart={(e) => this._handleDragStart(e, group.index)}
                   onDragEnd={this._handleDragEnd}
-                  styles={{ 
-                    root: { 
-                      fontSize: 14, 
-                      color: '#605e5c', 
-                      cursor: 'grab', 
+                  styles={{
+                    root: {
+                      fontSize: 14,
+                      color: '#605e5c',
+                      cursor: 'grab',
                       padding: '0 4px',
                       ':hover': { color: '#323130' }
-                    } 
+                    }
                   }}
                 />
                 <IconButton
@@ -390,18 +406,39 @@ export default class SavedBookmarkGroups extends React.Component<ISavedBookmarkG
                     columns={this._buildColumns(group.index, gs.sortKey, gs.isSortedDescending)}
                     selectionMode={SelectionMode.none}
                     isHeaderVisible={true}
+                    layoutMode={DetailsListLayoutMode.justified}
                     className={styles.list}
                     onRenderRow={(rowProps: IDetailsRowProps | undefined) => {
                       if (!rowProps) return null;
                       const item = rowProps.item as IBookmark;
-                      return (
-                        <DetailsRow
-                          {...rowProps}
-                          styles={item.suggestion ? {
-                            root: { borderLeft: '3px solid #f0a500', backgroundColor: '#fffcf0' }
-                          } : undefined}
-                        />
-                      );
+
+                      if (item.removedFromBackend) {
+                        return (
+                          <DetailsRow
+                            {...rowProps}
+                            styles={{
+                              root: {
+                                borderLeft: '3px solid #d13438',
+                                backgroundColor: '#fef6f6',
+                                opacity: 0.85
+                              }
+                            }}
+                          />
+                        );
+                      }
+
+                      if (item.suggestion) {
+                        return (
+                          <DetailsRow
+                            {...rowProps}
+                            styles={{
+                              root: { borderLeft: '3px solid #f0a500', backgroundColor: '#fffcf0' }
+                            }}
+                          />
+                        );
+                      }
+
+                      return <DetailsRow {...rowProps} />;
                     }}
                   />
                   {this._renderPagination(group.index, sorted.length)}
@@ -410,7 +447,7 @@ export default class SavedBookmarkGroups extends React.Component<ISavedBookmarkG
             </div>
           );
         })}
-        
+
         {labelSelectorTarget && selectedBookmark && (
           <LabelSelector
             targetElement={labelSelectorTarget}

@@ -5,7 +5,7 @@ import type { IBookmarkHubProps } from './IBookmarkHubProps';
 import { IBookmarkHubState } from './IBookmarkHubState';
 import { IBookmarkGroup } from '../../../services/models/IBookmarkGroup';
 import { IBookmarkLabel } from '../../../services/models/IBookmarkLabel';
-import { ActionButton, Spinner, SpinnerSize, Stack, Text } from '@fluentui/react';
+import { ActionButton, Spinner, SpinnerSize, Stack, Text, MessageBar, MessageBarType } from '@fluentui/react';
 import { IBookmark } from '../../../services/models/IBookmark';
 import { BookmarkLabel } from './shared/BookmarkLabel';
 import BookmarkHubToolbar from './bookmarkHubToolbar/BookmarkHubToolbar';
@@ -30,12 +30,9 @@ export default class BookmarkHub extends React.Component<IBookmarkHubProps, IBoo
   }
 
   public async componentDidMount(): Promise<void> {
-    const [bookmarks, appData] = await Promise.all([
-      this.props.bookmarkHubService.getAllBookmarks(),
-      this.props.bookmarkHubService.getAppData(),
-      CopilotChatService.init(this.props.context.msGraphClientFactory),
-    ]);
-    this.setState({ bookmarks, appData, isLoading: false });
+    await CopilotChatService.init(this.props.context.msGraphClientFactory);
+    const { backendBookmarks, appData } = await this.props.bookmarkHubService.getMergedBookmarks();
+    this.setState({ bookmarks: backendBookmarks, appData, isLoading: false });
   }
 
   private _onAssignGroup = async (bookmark: IBookmark, group: IBookmarkGroup): Promise<void> => {
@@ -278,6 +275,20 @@ export default class BookmarkHub extends React.Component<IBookmarkHubProps, IBoo
                     </ActionButton>
                   )}
                 </Stack>
+              );
+            })()}
+
+            {!isLoading && (() => {
+              const removedCount = (appData?.bookmarks ?? []).filter(bm => bm.removedFromBackend === true && bm.isCustom !== true).length;
+              if (removedCount === 0) return null;
+              return (
+                <MessageBar
+                  messageBarType={MessageBarType.warning}
+                  isMultiline={false}
+                  styles={{ root: { marginTop: 12 } }}
+                >
+                  <strong>{removedCount}</strong> bookmark{removedCount !== 1 ? 's' : ''} no longer exist{removedCount === 1 ? 's' : ''} in the backend.
+                </MessageBar>
               );
             })()}
 

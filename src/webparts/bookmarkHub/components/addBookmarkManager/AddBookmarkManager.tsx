@@ -117,7 +117,9 @@ export default class AddBookmarkManager extends React.Component<
       description: description.trim() || undefined,
       url: url.trim(),
       date: new Date().toISOString(),
-      type: BookmarkType.Site, // Default to site for custom bookmarks
+      type: BookmarkType.Site,
+      isCustom: true,
+      removedFromBackend: false,
       labels: selectedLabelObjects.length > 0 ? selectedLabelObjects : undefined,
       groups: selectedGroup ? [selectedGroup] : undefined,
     };
