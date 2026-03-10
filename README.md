@@ -5,17 +5,21 @@
 
 Bookmark Hub will allow you to easily find and organize all your flagged emails 📧, favorite files 📎, followed sites 🌐, and any custom URLs you might add, in simple and well organized table groups with labels 🏷️. This solution will allow you to bring together all loose ends that are stored outside of your well organized team in Teams. 
 
-// TODO: add image of the web part
+<img src="./assets/bookmarkHub.png" alt="Bookmark Hub" width="1000" />
 
 Stop correlating your Teams messages with hundreds of flagged emails or searching for the relevant followed document for your current work 🔍, instead organize all your bookmarked URLs (mails, files, sites, messages...) into meaningful groups like: 'Don't forget' 🚩, 'Priority' ⭐, 'Knowledge base' 📚, or something more meaningful connected to your projects and work. Use labels to easily find and filter out your bookmarks. 
 
-// TODO: add image of the web part
+<img src="./assets/bookmarkHub2.png" alt="Bookmark Hub" width="1000" />
+
+Easily extend your flagged emails, followed sites and favorite files with any custom URLs you want to add more context to your work.
+
+<img src="./assets/bookmarkHubCustomForm.png" alt="Bookmark Hub Custom Form" width="1000" />
 
 The application may easily be used as a full page SharePoint application, Microsoft 365 app, and a Teams personal app 🚀.
 
 Use Microsoft Copilot to suggest current or new groups for your bookmarks and start your organization journey with a little help of AI 🤖✨.
 
-// TODO: show AI suggestions in the web part in action
+<img src="./assets/aiCapabilities.png" alt="AI capabilities" width="1000" />
 
 ## Motivation
 
@@ -52,11 +56,11 @@ All those lose ends we need to remember about and we start:
 
 The problem is that it is still not organized. It is just 'saved for later not to forget'. Thats when CHAOS enters our work and projects. 🌪️
 
-![The chaos](./assets/chaos.png)
+<img src="./assets/chaos.png" alt="The chaos" width="1000" />
 
 What if we could correlate all those 'saved for later' followed sites, favorite files, bookmarked messages, flagged emails... and organize them with labels and groups so it all has some meaning. ✨ 
 
-![Bookmark hub aim](./assets/organize.png)
+<img src="./assets/organize.png" alt="Bookmark hub aim" width="1000" />
 
 ## Compatibility
 
