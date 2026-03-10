@@ -131,8 +131,8 @@ export default class SavedBookmarkGroups extends React.Component<ISavedBookmarkG
         key: 'title',
         name: 'Title',
         fieldName: 'title',
-        minWidth: 100,
-        maxWidth: 100,
+        minWidth: 150,
+        maxWidth: 200,
         isResizable: true,
         flexGrow: 1,
         isSorted: sortKey === 'title',
@@ -165,8 +165,8 @@ export default class SavedBookmarkGroups extends React.Component<ISavedBookmarkG
         key: 'labels',
         name: 'Labels',
         fieldName: 'labels',
-        minWidth: 120,
-        maxWidth: 250,
+        minWidth: 100,
+        maxWidth: 400,
         isResizable: true,
         flexGrow: 1,
         onRender: (item: IBookmark) => {
@@ -202,8 +202,8 @@ export default class SavedBookmarkGroups extends React.Component<ISavedBookmarkG
         key: 'group',
         name: 'Change Group',
         fieldName: 'group',
-        minWidth: 120,
-        maxWidth: 200,
+        minWidth: 60,
+        maxWidth: 80,
         isResizable: true,
         onRender: (item: IBookmark) => (
           <Stack horizontal verticalAlign="center" tokens={{ childrenGap: 4 }}>
@@ -212,7 +212,7 @@ export default class SavedBookmarkGroups extends React.Component<ISavedBookmarkG
               placeholder="Change group..."
               selectedKey={null}
               options={groupOptions}
-              styles={{ root: { minWidth: 120, width: '100%' } }}
+              styles={{ root: { minWidth: 30, width: '100%' } }}
               onChange={(_ev, option) => {
                 if (!option) return;
                 const group = groups.find((g: IBookmarkGroup) => g.index === option.key);
