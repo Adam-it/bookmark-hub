@@ -23,7 +23,7 @@ Use Microsoft Copilot to suggest current or new groups for your bookmarks and st
 
 ## Motivation
 
-Microsoft Teams is our 'single point' platform that allows to organize all of our work in a structured and unified, easy to search way. At least this is what it was supposed to do. 🤔 To some extend this is correct as Microsoft Teams allows us to organize our work and projects into Teams. 
+Microsoft Teams is our 'single point' platform that allows to organize all of our work in a structured and unified, easy to search way. At least this is what it was supposed to do. 🤔 To some extent this is correct as Microsoft Teams allows us to organize our work and projects into Teams. 
 
 Each Team groups together: 
 
@@ -31,14 +31,14 @@ Each Team groups together:
 - emails by having group email boxes, 📧 
 - SharePoint activities and files by having a team site correlated with each team 📁
 
-This works perfectly for most of the use case but as we all now, life is never that simple, and there are always some lose ends we need to remember about and 'manually' correlate them with our work and projects. I'm thinking about: 
+This works perfectly for most of the use case but as we all now, life is never that simple, and there are always some loose ends we need to remember about and 'manually' correlate them with our work and projects. I'm thinking about: 
 
 - those shared files we need to remember about 📎
 - or just files stored outside of our Teams team, kept on our OneDrive or some different SharePoint site ☁️
 - Those other SharePoint sites totally not connected in any way with our project 🌐
 - Those important emails we need to remember that related to our work or project ✉️
 
-All those lose ends we need to remember about and we start: 
+All those loose ends we need to remember about and we start: 
 
 - flagging emails, 
 
@@ -54,7 +54,7 @@ All those lose ends we need to remember about and we start:
 
 ...  All this so we don't forget 🚩 
 
-The problem is that it is still not organized. It is just 'saved for later not to forget'. Thats when CHAOS enters our work and projects. 🌪️
+The problem is that it is still not organized. It is just 'saved for later not to forget'. That's when CHAOS enters our work and projects. 🌪️
 
 <img src="./assets/chaos.png" alt="The chaos" width="1000" />
 
@@ -104,8 +104,8 @@ This sample is optimally compatible with the following environment configuration
 ## Prerequisites
 
 - In order to use AI capabilities of the web part to organize your bookmarks using Microsoft Copilot suggestions you will need to have an active copilot license.
-- After you build and package and deploy the webpart to your tenant you need to consent to the follwoing Web API permission using the SharePoint adming portal: `Sites.Read.All`, `Mail.Read`, `Files.ReadWrite`, `People.Read.All`, `OnlineMeetingTranscript.Read.All`, `Chat.Read`, `ChannelMessage.Read.All`, `ExternalItem.Read.All` 
-- It is not required but it woudld be good to have at least a few favorite sites, followed documents and flagged emails in order to have some bookmarks to organize
+- After you build and package and deploy the webpart to your tenant you need to consent to the following Web API permission using the SharePoint admin portal: `Sites.Read.All`, `Mail.Read`, `Files.ReadWrite`, `People.Read.All`, `OnlineMeetingTranscript.Read.All`, `Chat.Read`, `ChannelMessage.Read.All`, `ExternalItem.Read.All` 
+- It is not required but it would be good to have at least a few favorite sites, followed documents and flagged emails in order to have some bookmarks to organize
 
 ## Minimal path to awesome
 
@@ -130,7 +130,7 @@ To build, package and deploy the solution to a tenant, please follow the below g
 
 ### Pro Tip - SPFx Toolkit ⭐
 
-Use [SPFx Toolkit VS Code extension](https://marketplace.visualstudio.com/items?itemName=m365pnp.viva-connections-toolkit) to stream line building, testing, deploying, installing and everything that is needed for yous SPFx project.
+Use [SPFx Toolkit VS Code extension](https://marketplace.visualstudio.com/items?itemName=m365pnp.viva-connections-toolkit) to streamline building, testing, deploying, installing and everything that is needed for your SPFx project.
 
 Using [SPFx Toolkit Task view](https://marketplace.visualstudio.com/items?itemName=m365pnp.viva-connections-toolkit) You may simply use the `publish` task to build, package your solution. 
 
