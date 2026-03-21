@@ -1,3 +1,7 @@
+***⚠️Warning - this solution was moved***
+
+We no longer maintain this solution in this repo. It was moved to [PnP SPFx Webpart samples](https://github.com/pnp/sp-dev-fx-webparts/tree/main/samples/react-bookmark-hub). If you have any issue using this web part or would like to see it improved, please open up a issue in https://github.com/pnp/sp-dev-fx-webparts
+
 
 # Bookmark Hub
 
